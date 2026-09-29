@@ -262,6 +262,32 @@ async function mockApi(page: Page): Promise<void> {
 			})
 		})
 	);
+	await page.route('**/api/search**', (route) =>
+		route.fulfill({
+			status: 200,
+			body: envelope({
+				regions: [
+					{
+						kind: 'region',
+						id: '32',
+						title: 'Jawa Barat',
+						subtitle: 'Provinsi',
+						href: '/location/32'
+					}
+				],
+				events: [
+					{
+						kind: 'earthquake',
+						id: QUAKE_EVENT.id,
+						title: QUAKE_EVENT.title,
+						subtitle: 'Gempa · BMKG',
+						href: `/event/${QUAKE_EVENT.id}`
+					}
+				],
+				eventsSearched: true
+			})
+		})
+	);
 }
 
 test.describe('homepage', () => {
@@ -373,6 +399,24 @@ test.describe('security headers', () => {
 		expect(headers['content-security-policy']).toBeTruthy();
 		expect(headers['x-content-type-options']).toBe('nosniff');
 		expect(headers['x-frame-options']).toBe('DENY');
+	});
+});
+
+test.describe('global search', () => {
+	test('finds both regions and events from the header combobox', async ({ page }) => {
+		await mockApi(page);
+		await page.goto('/');
+
+		const input = page.getByRole('combobox', { name: /Cari wilayah atau kejadian/i });
+		await input.fill('jawa');
+
+		// Group headings prove the results are split by kind.
+		await expect(page.getByText('Wilayah', { exact: true })).toBeVisible();
+		await expect(page.getByText('Kejadian', { exact: true })).toBeVisible();
+		await expect(page.getByRole('option', { name: /Jawa Barat/ })).toBeVisible();
+		await expect(
+			page.getByRole('option', { name: new RegExp(QUAKE_EVENT.title.slice(0, 12)) })
+		).toBeVisible();
 	});
 });
 

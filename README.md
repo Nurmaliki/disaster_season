@@ -25,6 +25,8 @@ drought across Indonesia — built **only from official Indonesian data sources*
 - **Seasonal context** — the national monsoon phase, clearly labelled as coarse
   context rather than a regional seasonal forecast.
 - **Statistics** — counts derived only from events actually fetched.
+- **Global search** — one combobox over regions **and** current events, so
+  "bandung", "gempa", "merapi" and "banjir" all return real, linkable results.
 - **Provider health** — `/status` shows each source's _earned_ state, never an
   optimistic guess.
 
@@ -146,6 +148,7 @@ rate-limited and validates its query with Zod.
 | `GET /api/volcanoes`               | PVMBG/MAGMA activity levels (`level`, `aboveNormalOnly`).                                         |
 | `GET /api/weather?adm4=…`          | BMKG forecast for a village-level code.                                                           |
 | `GET /api/regions`                 | Region lookup (`q`, `province`) from the bundled table.                                           |
+| `GET /api/search?q=…`              | Unified search across regions **and** current events (earthquakes/warnings/volcanoes).            |
 | `GET /api/nearby?lat&lng&radiusKm` | Events within a radius (coordinate used in-process only).                                         |
 | `GET /api/risk`                    | Internal Risk Score with full factor breakdown + disclaimer.                                      |
 | `GET /api/statistics?window=7d`    | Counts over a real time window.                                                                   |

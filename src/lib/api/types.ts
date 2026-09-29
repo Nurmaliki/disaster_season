@@ -98,4 +98,24 @@ export interface RegionsPayload {
 	regencies: Region[];
 }
 
+export type SearchResultKind = 'region' | 'earthquake' | 'warning' | 'volcano';
+
+export interface SearchResult {
+	kind: SearchResultKind;
+	id: string;
+	title: string;
+	subtitle: string;
+	/** Pre-resolved pathname, provided for API consumers. */
+	href: string;
+	latitude?: number;
+	longitude?: number;
+}
+
+export interface SearchPayload {
+	regions: SearchResult[];
+	events: SearchResult[];
+	/** False when events could not be searched (provider failure). */
+	eventsSearched: boolean;
+}
+
 export type { DisasterEvent, ProviderHealth, Region, RiskAssessment };
