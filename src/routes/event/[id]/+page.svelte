@@ -67,6 +67,15 @@
 	</a>
 
 	<article class="card p-4">
+		{#if data.fromHistory}
+			<div class="mb-3">
+				<InlineNotice tone="neutral">
+					Peristiwa ini diambil dari riwayat tersimpan dan mungkin sudah tidak ditampilkan pada
+					umpan terkini sumber resmi.
+				</InlineNotice>
+			</div>
+		{/if}
+
 		<div class="flex flex-wrap items-center gap-2">
 			<CategoryChip category={event.category} size="md" />
 			<SeverityChip severity={event.severity} internal={event.severityIsInternal} size="md" full />

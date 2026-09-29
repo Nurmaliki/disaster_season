@@ -132,6 +132,12 @@ export interface ApiMeta {
 	/** Non-fatal issues encountered while building the response (e.g. provider down). */
 	warnings?: string[];
 	count?: number;
+	/** True when this record was served from durable history, not the live feed. */
+	fromHistory?: boolean;
+	/** True when the result was computed by SQL over durable history. */
+	searchedHistory?: boolean;
+	/** Whether events could be searched at all (search endpoint). */
+	eventsSearched?: boolean;
 }
 
 export interface ApiSuccess<T> {

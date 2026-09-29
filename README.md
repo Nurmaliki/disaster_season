@@ -143,6 +143,7 @@ rate-limited and validates its query with Zod.
 | ---------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `GET /api/dashboard`               | Homepage payload: warnings, earthquakes, volcanoes, ranked events, risk.                          |
 | `GET /api/events`                  | Filterable unified event stream (`type`, `category`, `severity`, `province`, `bbox`, `since`, …). |
+| `GET /api/events/[id]`             | A single event; falls back to durable history and reports `meta.fromHistory`.                     |
 | `GET /api/earthquakes`             | Earthquake records (`minMagnitude`, `tsunamiOnly`, `includeHistory`).                             |
 | `GET /api/warnings`                | BMKG CAP early warnings (`level`, `province`, `includeExpired`).                                  |
 | `GET /api/volcanoes`               | PVMBG/MAGMA activity levels (`level`, `aboveNormalOnly`).                                         |

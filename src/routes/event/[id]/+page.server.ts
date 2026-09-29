@@ -3,15 +3,17 @@ import type { PageServerLoad } from './$types';
 import { aggregateEvents } from '$lib/server/services/aggregate';
 import { eventStore } from '$lib/server/services/merge';
 import { eventRiskScore } from '$lib/server/risk/engine';
+import { readEventById } from '$lib/server/db/repository';
 import type { DisasterEvent } from '$lib/types';
 
 /**
  * Event detail load.
  *
  * The in-process store is empty on a cold instance, so we always populate it
- * from the aggregate before looking the event up. If the event truly cannot be
- * found (e.g. it aged out of the upstream feed), we return a 404 with an honest
- * message rather than a fabricated placeholder.
+ * from the aggregate before looking the event up. If the event is no longer in
+ * the live feed (it aged out of the upstream window), we fall back to durable
+ * storage so a shared or bookmarked link keeps working. Only if it is genuinely
+ * nowhere do we 404 with an honest message rather than a fabricated placeholder.
  */
 export const load: PageServerLoad = async ({ params, setHeaders }) => {
 	const id = decodeURIComponent(params.id);
@@ -27,7 +29,19 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 		// Fall through: we may already have the event from a previous request.
 	}
 
-	const event = eventStore.get(id);
+	// Live store first (always the freshest copy), then durable history.
+	let event = eventStore.get(id);
+	let fromHistory = false;
+
+	if (!event) {
+		const persisted = await readEventById(id);
+		if (persisted) {
+			event = persisted;
+			fromHistory = true;
+			// Adopt it into the store so related-events lookups see it too.
+			eventStore.put([persisted]);
+		}
+	}
 
 	if (!event) {
 		throw error(404, {
@@ -46,6 +60,8 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 		event: event as DisasterEvent,
 		related: related as DisasterEvent[],
 		internalRisk: eventRiskScore(event),
+		/** True when this record came from durable history, not the live feed. */
+		fromHistory,
 		updatedAt: new Date().toISOString()
 	};
 };
