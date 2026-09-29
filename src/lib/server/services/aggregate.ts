@@ -23,7 +23,7 @@ import { fetchVolcanoActivity } from '$lib/server/providers/pvmbg/volcano';
 import { normalizeVolcanoes } from '$lib/server/providers/pvmbg/volcano-normalizer';
 import { probeInarisk } from '$lib/server/providers/inarisk/layers';
 import { probeBnpb } from '$lib/server/providers/bnpb/disaster';
-import { persistEvents } from '$lib/server/db/repository';
+import { persistEvents, readRecentEvents } from '$lib/server/db/repository';
 
 /* ------------------------------------------------------------------ */
 /* Provider sync functions                                             */
@@ -523,3 +523,36 @@ function dedupeById(events: DisasterEvent[]): DisasterEvent[] {
 	}
 	return out;
 }
+
+/**
+ * Merges durable history into a live event list.
+ *
+ * Live events always win on id collisions: they are the freshest copy. When no
+ * database is configured (or the read fails) the live list is returned
+ * unchanged, so callers behave identically to the stateless build.
+ *
+ * `sinceMs` bounds how far back to read; pass `undefined` to read the whole
+ * retention window.
+ */
+export async function withHistory(
+	liveEvents: DisasterEvent[],
+	options: { sinceMs?: number; limit?: number } = {}
+): Promise<{ events: DisasterEvent[]; fromHistory: boolean }> {
+	const persisted = await readRecentEvents(
+		options.sinceMs ?? DEFAULT_HISTORY_WINDOW_MS,
+		options.limit
+	);
+
+	// No database (or a failed read): behave exactly as the stateless build.
+	if (!persisted) return { events: liveEvents, fromHistory: false };
+
+	const byId = new Map<string, DisasterEvent>();
+	for (const event of persisted) byId.set(event.id, event);
+	// Live copies overwrite the persisted ones.
+	for (const event of liveEvents) byId.set(event.id, event);
+
+	return { events: [...byId.values()], fromHistory: persisted.length > 0 };
+}
+
+/** Default lookback when a caller asks for history without a time bound. */
+const DEFAULT_HISTORY_WINDOW_MS = 90 * 24 * 3600_000;

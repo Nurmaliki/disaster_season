@@ -139,23 +139,23 @@ All responses use a uniform envelope: `{ success, data, meta }` on success and
 `{ success: false, error: { code, message } }` on failure. Every endpoint is
 rate-limited and validates its query with Zod.
 
-| Endpoint                           | Purpose                                                                                           |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `GET /api/dashboard`               | Homepage payload: warnings, earthquakes, volcanoes, ranked events, risk.                          |
-| `GET /api/events`                  | Filterable unified event stream (`type`, `category`, `severity`, `province`, `bbox`, `since`, …). |
-| `GET /api/events/[id]`             | A single event; falls back to durable history and reports `meta.fromHistory`.                     |
-| `GET /api/earthquakes`             | Earthquake records (`minMagnitude`, `tsunamiOnly`, `includeHistory`).                             |
-| `GET /api/warnings`                | BMKG CAP early warnings (`level`, `province`, `includeExpired`).                                  |
-| `GET /api/volcanoes`               | PVMBG/MAGMA activity levels (`level`, `aboveNormalOnly`).                                         |
-| `GET /api/weather?adm4=…`          | BMKG forecast for a village-level code.                                                           |
-| `GET /api/regions`                 | Region lookup (`q`, `province`) from the bundled table.                                           |
-| `GET /api/search?q=…`              | Unified search across regions **and** current events (earthquakes/warnings/volcanoes).            |
-| `GET /api/nearby?lat&lng&radiusKm` | Events within a radius (coordinate used in-process only).                                         |
-| `GET /api/risk`                    | Internal Risk Score with full factor breakdown + disclaimer.                                      |
-| `GET /api/statistics?window=7d`    | Counts over a real time window.                                                                   |
-| `GET /api/sources`                 | Provenance catalogue.                                                                             |
-| `GET /api/status`                  | Provider health (`?probe=1` for a live check).                                                    |
-| `GET /api/maintenance/retention`   | Cron-only retention prune; requires `CRON_SECRET` (503 when unset).                               |
+| Endpoint                           | Purpose                                                                                                                                                            |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET /api/dashboard`               | Homepage payload: warnings, earthquakes, volcanoes, ranked events, risk.                                                                                           |
+| `GET /api/events`                  | Filterable unified event stream (`type`, `category`, `severity`, `province`, `bbox`, `since`, …); merges durable history when configured (`meta.searchedHistory`). |
+| `GET /api/events/[id]`             | A single event; falls back to durable history and reports `meta.fromHistory`.                                                                                      |
+| `GET /api/earthquakes`             | Earthquake records (`minMagnitude`, `tsunamiOnly`, `includeHistory`).                                                                                              |
+| `GET /api/warnings`                | BMKG CAP early warnings (`level`, `province`, `includeExpired`).                                                                                                   |
+| `GET /api/volcanoes`               | PVMBG/MAGMA activity levels (`level`, `aboveNormalOnly`).                                                                                                          |
+| `GET /api/weather?adm4=…`          | BMKG forecast for a village-level code.                                                                                                                            |
+| `GET /api/regions`                 | Region lookup (`q`, `province`) from the bundled table.                                                                                                            |
+| `GET /api/search?q=…`              | Unified search across regions **and** current events (earthquakes/warnings/volcanoes).                                                                             |
+| `GET /api/nearby?lat&lng&radiusKm` | Events within a radius (coordinate used in-process only).                                                                                                          |
+| `GET /api/risk`                    | Internal Risk Score with full factor breakdown + disclaimer.                                                                                                       |
+| `GET /api/statistics?window=7d`    | Counts over a real time window.                                                                                                                                    |
+| `GET /api/sources`                 | Provenance catalogue.                                                                                                                                              |
+| `GET /api/status`                  | Provider health (`?probe=1` for a live check).                                                                                                                     |
+| `GET /api/maintenance/retention`   | Cron-only retention prune; requires `CRON_SECRET` (503 when unset).                                                                                                |
 
 ## Environment
 
@@ -191,6 +191,15 @@ dependency**. The query combines durable history with live events, and reports
 `searchedHistory` so callers know which path produced the result. Without a
 database (or without the extensions) it falls back to in-memory distance
 filtering over the live aggregate and reports `searchedHistory: false`.
+
+### History-aware event stream
+
+`GET /api/events` merges durable history into the live aggregate when a database
+is configured, so a long window (`sinceHours=168`) returns everything we hold
+rather than only what the current process has seen. **Live events always win on
+id collisions** (they are the freshest copy), and `meta.searchedHistory` reports
+whether history was actually read. Stateless deployments are unaffected: the
+live list is returned untouched and `searchedHistory` is `false`.
 
 ### Retention & maintenance
 
@@ -268,9 +277,9 @@ npx vitest run path/to/spec.ts # a single spec
   serverless they are best-effort guardrails rather than global quotas. Durable
   history via `DATABASE_URL` is the remedy for the event store specifically.
 - **Persistence is optional and off by default.** Without `DATABASE_URL`,
-  statistics and `/api/nearby` reflect only what the current process has seen.
-  No DB is required for any feature. Spatial search uses `cube`/`earthdistance`
-  rather than PostGIS to avoid a heavyweight dependency.
+  statistics, `/api/events` and `/api/nearby` reflect only what the current
+  process has seen. No DB is required for any feature. Spatial search uses
+  `cube`/`earthdistance` rather than PostGIS to avoid a heavyweight dependency.
 - **Retention must be scheduled externally.** The prune endpoint exists and is
   tested, but nothing runs it automatically outside Vercel (`vercel.json` cron).
   Self-hosted deployments should add their own scheduler, or storage will grow

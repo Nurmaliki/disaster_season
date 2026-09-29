@@ -445,3 +445,16 @@ test.describe('maintenance endpoint', () => {
 		expect(body.error.code).toBe('UNAVAILABLE');
 	});
 });
+
+test.describe('events endpoint provenance', () => {
+	test('reports searchedHistory:false when no database is configured', async ({ request }) => {
+		// The e2e server runs stateless (no DATABASE_URL). The response must say
+		// so honestly rather than implying it searched durable history.
+		const response = await request.get('/api/events?sinceHours=168&limit=2000');
+		expect(response.ok()).toBeTruthy();
+
+		const body = await response.json();
+		expect(body.success).toBe(true);
+		expect(body.meta.searchedHistory).toBe(false);
+	});
+});
