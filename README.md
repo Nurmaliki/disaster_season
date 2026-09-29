@@ -31,7 +31,8 @@ drought across Indonesia — built **only from official Indonesian data sources*
 ## Stack
 
 SvelteKit (latest) · TypeScript · Tailwind CSS v4 · Lucide icons · MapLibre GL JS
-· Zod · Vitest · Playwright · `@sveltejs/adapter-vercel` · PWA.
+· Zod · Vitest · Playwright · `@sveltejs/adapter-vercel` · PWA · optional
+PostgreSQL via Drizzle ORM (fully stateless without it).
 
 ## Architecture
 
@@ -48,6 +49,10 @@ Browser ──▶ SvelteKit routes/pages ──▶ /api/* gateway routes ──�
 - Every provider call has timeout, retry with backoff, in-flight de-duplication,
   schema validation, TTL cache with stale fallback, and structured logging.
   **The app never crashes when a provider fails** — it degrades and says so.
+- Persistence is **optional and off the critical path**: when a database is
+  configured, events are written fire-and-forget and read back best-effort. All
+  database access goes through a `safely()` wrapper, so storage can only ever
+  cost history — never availability.
 
 ### Data categories are never conflated
 
@@ -77,6 +82,7 @@ src/
 │   │   ├── api/                 # envelopes, rate limiting, Zod validation
 │   │   ├── cache/               # TTL cache with stale-while-revalidate
 │   │   ├── config.ts            # all endpoints, TTLs, limits (env-driven)
+│   │   ├── db/                  # OPTIONAL PostgreSQL: schema, client, repository
 │   │   ├── http.ts              # fetchJson: timeout, retry, dedupe, logging
 │   │   ├── xml.ts               # dependency-free XML reader (CAP parsing)
 │   │   ├── logger.ts            # structured JSON logging
@@ -153,6 +159,32 @@ with the official endpoints as defaults. Only `PUBLIC_*` variables reach the
 browser, and no secret may ever be `PUBLIC_`. No API secrets are exposed to the
 frontend.
 
+### Optional persistence
+
+The app is **stateless by default** and runs with zero configuration. Setting
+`DATABASE_URL` opts into durable storage of normalized events, which is used to
+give `/api/statistics` real history beyond the current process's lifetime:
+
+- **Without `DATABASE_URL`** — statistics are computed from live events only,
+  and the API reports `persisted: false`. Nothing else changes.
+- **With `DATABASE_URL`** — events are upserted on every aggregation (fire and
+  forget), and statistics merge live + persisted history, reporting
+  `persisted: true` and how many rows came from storage.
+
+A database outage can **never** break a request: every read and write goes
+through a `safely()` wrapper that degrades to the in-memory path on any error.
+`GET /api/status` reports the active mode under `persistence.mode`
+(`stateless` | `durable`).
+
+```sh
+createdb disaster_monitor
+DATABASE_URL=postgres://user@localhost:5432/disaster_monitor npm run db:push
+```
+
+The schema lives in `src/lib/server/db/schema.ts`; generated SQL migrations are
+committed under `drizzle/`. PostGIS is **not required** (the app stores points,
+not geometry) — it can be added later for spatial queries.
+
 ## Commands
 
 ```sh
@@ -165,14 +197,22 @@ npm run lint       # ESLint + Prettier check
 npm run format     # auto-format
 npm run build      # production build
 npm run preview    # preview the production build
+
+# optional database (only needed when DATABASE_URL is set)
+npm run db:generate   # generate a SQL migration from the schema
+npm run db:push       # push the schema to the database (no migration files)
+npm run db:migrate    # apply committed migrations
+npm run db:studio     # open Drizzle Studio
 ```
 
 ## Tests
 
 - **Unit tests** (Vitest) cover the provider normalizers (BMKG earthquake, BMKG
   CAP warning incl. lat/lon→lon/lat polygon inversion, PVMBG volcano), the XML
-  reader, the risk engine, event merging/deduplication, and the geo/format/region
-  utilities. Fixtures are **real captured payloads** from the official APIs.
+  reader, the risk engine, event merging/deduplication, statistics composition,
+  the optional persistence layer's disabled-path contract, and the
+  geo/format/region utilities. Fixtures are **real captured payloads** from the
+  official APIs.
 - **End-to-end tests** (Playwright) cover pages rendering, map mount, filters,
   detail pages and mobile responsiveness.
 
@@ -197,14 +237,18 @@ npx vitest run path/to/spec.ts # a single spec
 - **The Risk Score is an internal indicator**, not an official warning, and its
   weights are a documented heuristic — the full breakdown is always shown.
 - **Rate limiting and the event store are per-instance** (in-process), so on
-  serverless they are best-effort guardrails rather than global quotas.
+  serverless they are best-effort guardrails rather than global quotas. Durable
+  history via `DATABASE_URL` is the remedy for the event store specifically.
+- **Persistence is optional and off by default.** Without `DATABASE_URL`,
+  statistics reflect only what the current process has seen. No DB is required
+  for any feature; PostGIS is neither used nor required.
 - **Seasonal context is national and coarse** (calendar-month based), not a
   region-level seasonal forecast.
 
 ## Next development
 
 - Ingest BMKG "Prakiraan Awal Musim" per zone for region-level seasonal outlooks.
-- Add a PostGIS-backed store for historical analysis and richer statistics.
+- Add PostGIS geometry columns for spatial queries (radius/bbox at the DB level).
 - Push notifications for new warnings in a saved region (opt-in, privacy-first).
 - Saved locations / favourites with a local-only footprint.
 - Additional hazard layers (InaRISK) once a reachable endpoint is available.

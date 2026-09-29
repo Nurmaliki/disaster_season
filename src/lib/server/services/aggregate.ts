@@ -23,6 +23,7 @@ import { fetchVolcanoActivity } from '$lib/server/providers/pvmbg/volcano';
 import { normalizeVolcanoes } from '$lib/server/providers/pvmbg/volcano-normalizer';
 import { probeInarisk } from '$lib/server/providers/inarisk/layers';
 import { probeBnpb } from '$lib/server/providers/bnpb/disaster';
+import { persistEvents } from '$lib/server/db/repository';
 
 /* ------------------------------------------------------------------ */
 /* Provider sync functions                                             */
@@ -413,6 +414,11 @@ export async function aggregateEvents(
 
 	const events = mergeEvents(payloads);
 
+	// Persist opportunistically. This is deliberately fire-and-forget: a slow or
+	// failing database must never delay or break an API response, and the whole
+	// call already degrades to a no-op when persistence is not configured.
+	void persistEventsSafely(events);
+
 	return {
 		events,
 		sources,
@@ -420,6 +426,21 @@ export async function aggregateEvents(
 		partial: sources.some((s) => s.status !== 'ok'),
 		warnings
 	};
+}
+
+/**
+ * Writes events to durable storage without ever surfacing a failure.
+ *
+ * Isolated here so the import of the database layer stays off the critical path
+ * and so a rejection can be swallowed explicitly (rather than relying on an
+ * unhandled-rejection handler).
+ */
+async function persistEventsSafely(events: DisasterEvent[]): Promise<void> {
+	try {
+		await persistEvents(events);
+	} catch (error) {
+		logger.warn('event persistence skipped', { scope: 'db', error });
+	}
 }
 
 /* ------------------------------------------------------------------ */

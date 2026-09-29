@@ -8,6 +8,8 @@ import {
 } from '$lib/server/api/response';
 import { getSourceStatusView } from '$lib/server/services/dashboard';
 import { getAllProviderHealth, PROVIDER_DESCRIPTORS } from '$lib/server/services/health';
+import { isDatabaseEnabled } from '$lib/server/db/client';
+import { config } from '$lib/server/config';
 
 /**
  * GET /api/status
@@ -50,7 +52,14 @@ export const GET: RequestHandler = async ({ url, request }) => {
 				observed,
 				providers: view,
 				declaredCount: PROVIDER_DESCRIPTORS.length,
-				liveProbe
+				liveProbe,
+				persistence: {
+					/** True when events are written to durable storage. */
+					enabled: isDatabaseEnabled(),
+					/** Stateless means history is lost on restart — stated plainly. */
+					mode: isDatabaseEnabled() ? 'durable' : 'stateless',
+					retentionDays: isDatabaseEnabled() ? config.database.retentionDays : null
+				}
 			},
 			{
 				source: 'Registry kesehatan provider',

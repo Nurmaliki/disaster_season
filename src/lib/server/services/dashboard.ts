@@ -4,6 +4,7 @@ import { getVolcanoes } from '$lib/server/services/aggregate';
 import { assessRisk, eventRiskScore } from '$lib/server/risk/engine';
 import { getAllProviderHealth, PROVIDER_DESCRIPTORS } from '$lib/server/services/health';
 import { eventTimestamp, eventStore } from '$lib/server/services/merge';
+import { readRecentEvents } from '$lib/server/db/repository';
 import { logger } from '$lib/server/logger';
 
 /**
@@ -128,6 +129,10 @@ export interface StatisticsResult {
 	magnitudeBuckets: StatisticsBucket[];
 	updatedAt: string;
 	partial: boolean;
+	/** True when durable history was available and merged into these counts. */
+	persisted: boolean;
+	/** Number of events read from durable history for this window. */
+	persistedCount: number;
 }
 
 const TYPE_LABELS: Record<DisasterType, string> = {
@@ -154,6 +159,11 @@ const TYPE_LABELS: Record<DisasterType, string> = {
  * Counts are derived exclusively from real events fetched from official
  * sources. When a window has few records this is reported honestly as a count,
  * never padded or extrapolated.
+ *
+ * When durable storage is configured, historical events from before this
+ * instance started are merged in, so a long window is not silently truncated to
+ * "whatever this process happens to have seen". The persisted counts are
+ * reported via `persisted` so the UI can be honest about provenance.
  */
 export async function getStatistics(
 	windowMs: number,
@@ -164,8 +174,19 @@ export async function getStatistics(
 	const aggregate = await aggregateEvents({ forceRefresh });
 	eventStore.put(aggregate.events);
 
+	// Merge live events with anything durably stored for this window. The
+	// database is best-effort: `readRecentEvents` returns null when unavailable.
+	const persisted = await readRecentEvents(windowMs);
+	const persistedCount = persisted?.length ?? 0;
+
+	const byId = new Map<string, DisasterEvent>();
+	for (const event of persisted ?? []) byId.set(event.id, event);
+	// Live events win over stale persisted copies of the same id.
+	for (const event of aggregate.events) byId.set(event.id, event);
+	const merged = [...byId.values()];
+
 	const cutoff = Date.now() - windowMs;
-	const inWindow = aggregate.events.filter((event) => eventTimestamp(event) >= cutoff);
+	const inWindow = merged.filter((event) => eventTimestamp(event) >= cutoff);
 
 	return {
 		window: windowLabel,
@@ -189,7 +210,9 @@ export async function getStatistics(
 		})),
 		magnitudeBuckets: bucketMagnitudes(inWindow),
 		updatedAt: aggregate.updatedAt,
-		partial: aggregate.partial
+		partial: aggregate.partial,
+		persisted: persisted !== null,
+		persistedCount
 	};
 }
 

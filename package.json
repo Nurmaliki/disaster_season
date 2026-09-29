@@ -16,7 +16,11 @@
 		"test": "vitest run",
 		"test:e2e": "playwright test",
 		"test:watch": "vitest",
-		"test:e2e:install": "playwright install"
+		"test:e2e:install": "playwright install",
+		"db:generate": "drizzle-kit generate",
+		"db:push": "drizzle-kit push",
+		"db:migrate": "drizzle-kit migrate",
+		"db:studio": "drizzle-kit studio"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
@@ -28,6 +32,7 @@
 		"@tailwindcss/vite": "^4.3.0",
 		"@types/geojson": "^7946.0.16",
 		"@types/node": "^24",
+		"drizzle-kit": "^0.31.11",
 		"eslint": "^10.4.1",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-svelte": "^3.19.0",
@@ -45,7 +50,9 @@
 		"vitest": "^4.1.8"
 	},
 	"dependencies": {
+		"drizzle-orm": "^0.45.3",
 		"lucide-svelte": "^1.0.1",
+		"postgres": "^3.4.9",
 		"zod": "^4.6.5"
 	},
 	"description": "Indonesia Disaster & Season Monitor — peta pemantauan cuaca, gempa, peringatan dini, gunung api, dan risiko bencana Indonesia."

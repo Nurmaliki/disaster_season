@@ -81,7 +81,28 @@ export const config = {
 	logLevel: str(env.LOG_LEVEL, 'info'),
 
 	/** Hard ceiling on any single upstream call, regardless of provider config. */
-	globalTimeoutMs: num(env.GLOBAL_TIMEOUT_MS, 30_000)
+	globalTimeoutMs: num(env.GLOBAL_TIMEOUT_MS, 30_000),
+
+	/**
+	 * Optional persistence.
+	 *
+	 * The application is designed to run fully stateless: when `DATABASE_URL` is
+	 * absent the in-process event store is used and the app behaves identically
+	 * (minus cross-restart history). Setting `DATABASE_URL` opts into durable
+	 * history for statistics — it is never required for the app to function.
+	 *
+	 * `DATABASE_URL` must NOT be prefixed PUBLIC_ and is never sent to the client.
+	 */
+	database: {
+		url: str(env.DATABASE_URL, ''),
+		enabled: Boolean(env.DATABASE_URL && env.DATABASE_URL.trim()),
+		/** Connection pool ceiling per instance. */
+		maxConnections: num(env.DATABASE_MAX_CONNECTIONS, 5),
+		/** Statement/connection timeout in ms. */
+		connectTimeoutMs: num(env.DATABASE_CONNECT_TIMEOUT_MS, 10_000),
+		/** How long a persisted event is retained before pruning. */
+		retentionDays: num(env.DATABASE_RETENTION_DAYS, 90)
+	}
 } as const;
 
 /**
