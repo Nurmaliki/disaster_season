@@ -119,25 +119,10 @@ export const config = {
 } as const;
 
 /**
- * Public configuration. Kept separate from `config` because these values are
- * exposed to the browser bundle and must therefore be prefixed PUBLIC_ and
- * must never contain secrets.
+ * Note: browser-exposed map configuration (basemap style URLs) is read directly
+ * from `$env/dynamic/public` inside the map component, so there is a single
+ * source of truth and no server-side duplicate that could drift out of sync.
+ * See `PUBLIC_MAP_STYLE_*` in `.env.example`.
  */
-export const publicConfig = {
-	map: {
-		styleUrl: str(
-			env.PUBLIC_MAP_STYLE_URL,
-			'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
-		),
-		darkStyleUrl: str(
-			env.PUBLIC_MAP_STYLE_DARK_URL,
-			'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
-		),
-		lightStyleUrl: str(
-			env.PUBLIC_MAP_STYLE_LIGHT_URL,
-			'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
-		)
-	}
-} as const;
 
 export type Config = typeof config;

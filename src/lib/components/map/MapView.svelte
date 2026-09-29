@@ -11,6 +11,7 @@
 
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
+	import { env } from '$env/dynamic/public';
 	import type { Map as MaplibreMap, GeoJSONSource } from 'maplibre-gl';
 	import type { DisasterEvent } from '$lib/types';
 	import {
@@ -64,6 +65,8 @@
 	let map: MaplibreMap | null = null;
 	let mapReady = $state(false);
 	let mapError = $state<string | null>(null);
+	/** Fires if the basemap has not loaded within the grace period. */
+	let loadWatchdog: number | null = null;
 	let locating = $state(false);
 	let locationNotice = $state<string | null>(null);
 	let showLayers = $state(false);
@@ -80,10 +83,21 @@
 
 	const byId = $derived(new Map(events.map((event) => [event.id, event])));
 
+	/**
+	 * Basemap style for the active theme.
+	 *
+	 * These come from PUBLIC_MAP_STYLE_* so a deployment can point at a different
+	 * provider without a code change. The defaults are OpenFreeMap, which serves
+	 * the whole style from one host and is not commonly blocked by browser
+	 * extensions (a blocked basemap shows a blank map).
+	 */
+	const MAP_STYLES = {
+		light: env.PUBLIC_MAP_STYLE_LIGHT_URL || 'https://tiles.openfreemap.org/styles/positron',
+		dark: env.PUBLIC_MAP_STYLE_DARK_URL || 'https://tiles.openfreemap.org/styles/dark'
+	} as const;
+
 	function styleUrlFor(currentTheme: string): string {
-		return currentTheme === 'dark'
-			? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
-			: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
+		return currentTheme === 'dark' ? MAP_STYLES.dark : MAP_STYLES.light;
 	}
 
 	/** The set of categories currently visible, as a MapLibre `in` filter. */
@@ -147,7 +161,7 @@
 				new maplibre.AttributionControl({
 					compact: true,
 					customAttribution:
-						'Data: BMKG, PVMBG/MAGMA, BNPB, InaRISK · Peta: © OpenStreetMap contributors, © CARTO'
+						'Data: BMKG, PVMBG/MAGMA, BNPB, InaRISK · Peta: © OpenStreetMap contributors, © OpenFreeMap'
 				}),
 				'bottom-right'
 			);
@@ -157,6 +171,7 @@
 				if (!map) return;
 				addSourcesAndLayers();
 				mapReady = true;
+				mapError = null;
 				updateData();
 			});
 
@@ -166,6 +181,17 @@
 				if (!mapReady)
 					mapError = 'Gaya peta tidak dapat dimuat. Data tetap dapat dilihat pada daftar.';
 			});
+
+			// If the basemap never loads (offline, DNS failure, or a browser
+			// extension blocking the tile host) MapLibre can stay silent rather than
+			// raising an error event, leaving a blank canvas with no explanation.
+			// Surface it explicitly so the blank map is never unexplained.
+			loadWatchdog = window.setTimeout(() => {
+				if (!mapReady) {
+					mapError =
+						'Peta dasar tidak dapat dimuat. Periksa koneksi internet, atau matikan pemblokir iklan untuk situs ini. Data tetap tersedia pada daftar di samping.';
+				}
+			}, 8000);
 
 			if (syncUrl) {
 				map.on('moveend', persistView);
@@ -232,6 +258,12 @@
 			filter: ['has', 'point_count'] as never,
 			layout: {
 				'text-field': ['get', 'point_count_abbreviated'] as never,
+				// An explicit font stack is required: when omitted MapLibre falls
+				// back to its built-in default ("Open Sans Regular", "Arial Unicode
+				// MS Regular"), which most basemap glyph servers (including
+				// OpenFreeMap) do not host, producing 404s and locally-rendered,
+				// inconsistent glyphs. "Noto Sans Bold" is served by the basemap.
+				'text-font': ['Noto Sans Bold'] as never,
 				'text-size': 12
 			},
 			paint: { 'text-color': '#ffffff' }
@@ -261,6 +293,9 @@
 			filter: ['!', ['has', 'point_count']] as never,
 			layout: {
 				'text-field': ['get', 'typeLabel'] as never,
+				// See clusterCount above: an explicit, basemap-hosted font stack
+				// avoids 404 glyph lookups for MapLibre's built-in default fonts.
+				'text-font': ['Noto Sans Regular'] as never,
 				'text-size': 10,
 				'text-offset': [0, 1.4],
 				'text-anchor': 'top',
@@ -510,6 +545,7 @@
 	});
 
 	onDestroy(() => {
+		if (loadWatchdog) clearTimeout(loadWatchdog);
 		map?.remove();
 		map = null;
 	});

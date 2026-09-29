@@ -50,12 +50,18 @@ function buildCsp(isDev: boolean): string {
 		'https://*.cartocdn.com'
 	];
 
+	// Vector basemaps fetch their glyph (font) ranges as .pbf files from the tile
+	// hosts. If font-src does not allow those hosts the glyph requests are
+	// blocked, MapLibre treats the style as broken, and the map renders blank
+	// while every other part of the page looks fine.
+	const fontSrc = ["'self'", 'data:', 'https://*.basemaps.cartocdn.com', 'https://*.cartocdn.com'];
+
 	return [
 		"default-src 'self'",
 		`script-src ${scriptSrc.join(' ')}`,
 		"style-src 'self' 'unsafe-inline'",
 		`img-src ${imgSrc.join(' ')}`,
-		"font-src 'self' data:",
+		`font-src ${fontSrc.join(' ')}`,
 		`connect-src ${connectSrc.join(' ')}`,
 		`worker-src ${workerSrc.join(' ')}`,
 		"child-src 'self' blob:",
