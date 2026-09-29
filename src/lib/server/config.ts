@@ -102,6 +102,19 @@ export const config = {
 		connectTimeoutMs: num(env.DATABASE_CONNECT_TIMEOUT_MS, 10_000),
 		/** How long a persisted event is retained before pruning. */
 		retentionDays: num(env.DATABASE_RETENTION_DAYS, 90)
+	},
+
+	/**
+	 * Maintenance / retention.
+	 *
+	 * `CRON_SECRET` protects the maintenance endpoint that prunes expired events.
+	 * When it is unset, the endpoint refuses to run at all rather than leaving an
+	 * unauthenticated destructive route open. This is a credential and is never
+	 * exposed to the browser.
+	 */
+	maintenance: {
+		cronSecret: str(env.CRON_SECRET, ''),
+		enabled: Boolean(env.CRON_SECRET && env.CRON_SECRET.trim())
 	}
 } as const;
 

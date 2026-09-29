@@ -155,6 +155,7 @@ rate-limited and validates its query with Zod.
 | `GET /api/statistics?window=7d`    | Counts over a real time window.                                                                   |
 | `GET /api/sources`                 | Provenance catalogue.                                                                             |
 | `GET /api/status`                  | Provider health (`?probe=1` for a live check).                                                    |
+| `GET /api/maintenance/retention`   | Cron-only retention prune; requires `CRON_SECRET` (503 when unset).                               |
 
 ## Environment
 
@@ -190,6 +191,19 @@ dependency**. The query combines durable history with live events, and reports
 `searchedHistory` so callers know which path produced the result. Without a
 database (or without the extensions) it falls back to in-memory distance
 filtering over the live aggregate and reports `searchedHistory: false`.
+
+### Retention & maintenance
+
+Persisted events are pruned by a scheduled maintenance job so storage does not
+grow without bound. `GET /api/maintenance/retention` deletes rows whose
+`updated_at` is older than `DATABASE_RETENTION_DAYS` (default 90) and returns a
+`{ before, deleted, after, retentionDays }` report.
+
+It is protected by `CRON_SECRET` via `Authorization: Bearer …`, and **refuses to
+run at all (HTTP 503) when the secret is unset** — an unauthenticated destructive
+route is worse than no pruning. `vercel.json` schedules it daily at 17:00 UTC
+(midnight WIB). It is deliberately never triggered as a side effect of a page
+load.
 
 ```sh
 createdb disaster_monitor
@@ -257,6 +271,10 @@ npx vitest run path/to/spec.ts # a single spec
   statistics and `/api/nearby` reflect only what the current process has seen.
   No DB is required for any feature. Spatial search uses `cube`/`earthdistance`
   rather than PostGIS to avoid a heavyweight dependency.
+- **Retention must be scheduled externally.** The prune endpoint exists and is
+  tested, but nothing runs it automatically outside Vercel (`vercel.json` cron).
+  Self-hosted deployments should add their own scheduler, or storage will grow
+  unbounded.
 - **Seasonal context is national and coarse** (calendar-month based), not a
   region-level seasonal forecast.
 

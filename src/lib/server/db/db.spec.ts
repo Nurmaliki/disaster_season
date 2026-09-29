@@ -5,7 +5,8 @@ import {
 	readRecentEvents,
 	readEventById,
 	pruneOldEvents,
-	findEventsNearby
+	findEventsNearby,
+	countEvents
 } from '$lib/server/db/repository';
 import type { DisasterEvent } from '$lib/types';
 
@@ -81,5 +82,9 @@ describe('repository (disabled)', () => {
 
 	it('findEventsNearby returns null so callers fall back to in-memory filtering', async () => {
 		await expect(findEventsNearby(-6.2, 106.8, 100)).resolves.toBeNull();
+	});
+
+	it('countEvents returns null when unavailable (not a misleading 0)', async () => {
+		await expect(countEvents()).resolves.toBeNull();
 	});
 });

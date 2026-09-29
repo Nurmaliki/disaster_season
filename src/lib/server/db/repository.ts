@@ -308,7 +308,13 @@ export async function readPersistedCounts(
 
 /**
  * Deletes events older than the retention window.
- * Called opportunistically after a sync; safe to run repeatedly.
+ *
+ * Idempotent and safe to run repeatedly. Retention is measured from
+ * `updated_at` so a record that keeps being re-observed upstream is never
+ * pruned while it is still current.
+ *
+ * Returns the number of rows deleted, or 0 when persistence is disabled. Any
+ * failure is swallowed by `safely` — maintenance must never take the app down.
  */
 export async function pruneOldEvents(retentionDays: number): Promise<number> {
 	const database = getDatabase();
@@ -320,7 +326,18 @@ export async function pruneOldEvents(retentionDays: number): Promise<number> {
 			.delete(disasterEvents)
 			.where(sql`${disasterEvents.updatedAt} < ${cutoffIso}::timestamptz`)
 			.returning({ id: disasterEvents.id });
-		logger.info('pruned old events', { scope: 'db', deleted: deleted.length });
+		logger.info('pruned old events', { scope: 'db', deleted: deleted.length, retentionDays });
 		return deleted.length;
 	}, 0);
+}
+
+/** Total rows currently stored. Used by maintenance reporting. */
+export async function countEvents(): Promise<number | null> {
+	const database = getDatabase();
+	if (!database) return null;
+
+	return safely(async () => {
+		const [row] = await database.select({ count: sql<number>`count(*)::int` }).from(disasterEvents);
+		return Number(row?.count ?? 0);
+	}, null);
 }

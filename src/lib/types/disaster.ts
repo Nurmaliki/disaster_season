@@ -153,7 +153,9 @@ export type ApiErrorCode =
 	| 'RATE_LIMIT'
 	| 'NOT_FOUND'
 	| 'DATABASE_ERROR'
-	| 'TIMEOUT';
+	| 'TIMEOUT'
+	| 'FORBIDDEN'
+	| 'UNAVAILABLE';
 
 export interface ApiFailure {
 	success: false;

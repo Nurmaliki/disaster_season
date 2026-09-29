@@ -433,3 +433,15 @@ test.describe('PWA', () => {
 		expect(manifest.name).toContain('Indonesia');
 	});
 });
+
+test.describe('maintenance endpoint', () => {
+	test('refuses to run without a configured secret', async ({ request }) => {
+		// The e2e server runs with CRON_SECRET unset, which must mean "refuse",
+		// never "run unauthenticated".
+		const response = await request.get('/api/maintenance/retention');
+		expect(response.status()).toBe(503);
+		const body = await response.json();
+		expect(body.success).toBe(false);
+		expect(body.error.code).toBe('UNAVAILABLE');
+	});
+});
