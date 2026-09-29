@@ -56,7 +56,9 @@ export function warningEventId(alert: CapAlert): string {
 }
 
 /** Rough centroid of a CAP MultiPolygon, used to place the map marker. */
-function geometryCentroid(geometry: GeoJSON.MultiPolygon | null): { lat: number; lon: number } | null {
+function geometryCentroid(
+	geometry: GeoJSON.MultiPolygon | null
+): { lat: number; lon: number } | null {
 	if (!geometry || geometry.coordinates.length === 0) return null;
 	const points: number[][] = [];
 	for (const polygon of geometry.coordinates) {
@@ -71,15 +73,45 @@ function geometryCentroid(geometry: GeoJSON.MultiPolygon | null): { lat: number;
 export function inferProvince(areaDesc: string | null | undefined): string | undefined {
 	if (!areaDesc) return undefined;
 	const provinces = [
-		'Aceh', 'Sumatera Utara', 'Sumatera Barat', 'Riau', 'Kepulauan Riau', 'Jambi',
-		'Bengkulu', 'Sumatera Selatan', 'Kepulauan Bangka Belitung', 'Lampung', 'Banten',
-		'DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'DI Yogyakarta',
-		'Daerah Istimewa Yogyakarta', 'Jawa Timur', 'Bali',
-		'Nusa Tenggara Barat', 'Nusa Tenggara Timur', 'Kalimantan Barat',
-		'Kalimantan Tengah', 'Kalimantan Selatan', 'Kalimantan Timur', 'Kalimantan Utara',
-		'Sulawesi Utara', 'Gorontalo', 'Sulawesi Tengah', 'Sulawesi Barat', 'Sulawesi Selatan',
-		'Sulawesi Tenggara', 'Maluku', 'Maluku Utara', 'Papua Barat', 'Papua', 'Papua Selatan',
-		'Papua Tengah', 'Papua Pegunungan', 'Papua Barat Daya'
+		'Aceh',
+		'Sumatera Utara',
+		'Sumatera Barat',
+		'Riau',
+		'Kepulauan Riau',
+		'Jambi',
+		'Bengkulu',
+		'Sumatera Selatan',
+		'Kepulauan Bangka Belitung',
+		'Lampung',
+		'Banten',
+		'DKI Jakarta',
+		'Jawa Barat',
+		'Jawa Tengah',
+		'DI Yogyakarta',
+		'Daerah Istimewa Yogyakarta',
+		'Jawa Timur',
+		'Bali',
+		'Nusa Tenggara Barat',
+		'Nusa Tenggara Timur',
+		'Kalimantan Barat',
+		'Kalimantan Tengah',
+		'Kalimantan Selatan',
+		'Kalimantan Timur',
+		'Kalimantan Utara',
+		'Sulawesi Utara',
+		'Gorontalo',
+		'Sulawesi Tengah',
+		'Sulawesi Barat',
+		'Sulawesi Selatan',
+		'Sulawesi Tenggara',
+		'Maluku',
+		'Maluku Utara',
+		'Papua Barat',
+		'Papua',
+		'Papua Selatan',
+		'Papua Tengah',
+		'Papua Pegunungan',
+		'Papua Barat Daya'
 	];
 	const lower = areaDesc.toLowerCase();
 	return provinces.find((province) => lower.includes(province.toLowerCase()));

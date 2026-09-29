@@ -165,7 +165,12 @@ export interface DisasterTypeToken {
 
 export const DISASTER_TYPE_TOKENS: Record<DisasterType, DisasterTypeToken> = {
 	weather: { key: 'weather', label: 'Cuaca', icon: 'CloudSun', shape: 'point' },
-	extreme_weather: { key: 'extreme_weather', label: 'Cuaca Ekstrem', icon: 'CloudLightning', shape: 'polygon' },
+	extreme_weather: {
+		key: 'extreme_weather',
+		label: 'Cuaca Ekstrem',
+		icon: 'CloudLightning',
+		shape: 'polygon'
+	},
 	earthquake: { key: 'earthquake', label: 'Gempa Bumi', icon: 'Activity', shape: 'point' },
 	tsunami: { key: 'tsunami', label: 'Tsunami', icon: 'Waves', shape: 'point' },
 	flood: { key: 'flood', label: 'Banjir', icon: 'Droplets', shape: 'polygon' },
@@ -186,7 +191,9 @@ export function disasterTypeToken(type: DisasterType | null | undefined): Disast
 }
 
 /** MapLibre paint expressions keyed by severity, used by the GeoJSON layers. */
-export function severityMatchExpression(fallback = SEVERITY_TOKENS.unknown.hex): ExpressionSpecification {
+export function severityMatchExpression(
+	fallback = SEVERITY_TOKENS.unknown.hex
+): ExpressionSpecification {
 	return [
 		'match',
 		['get', 'severity'],

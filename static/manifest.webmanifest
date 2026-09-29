@@ -1,0 +1,48 @@
+{
+	"name": "Indonesia Disaster & Season Monitor",
+	"short_name": "ID Monitor",
+	"description": "Pemantauan cuaca, musim, peringatan dini, gempa bumi, gunung api, dan bencana Indonesia berdasarkan sumber resmi BMKG, BNPB, dan PVMBG.",
+	"lang": "id",
+	"dir": "ltr",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"orientation": "any",
+	"background_color": "#0b1220",
+	"theme_color": "#0b1220",
+	"categories": ["weather", "news", "utilities"],
+	"icons": [
+		{
+			"src": "/icons/icon-192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "/icons/icon-512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any"
+		},
+		{
+			"src": "/icons/icon-maskable-512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "maskable"
+		}
+	],
+	"shortcuts": [
+		{
+			"name": "Peta",
+			"url": "/map"
+		},
+		{
+			"name": "Peringatan Dini",
+			"url": "/warnings"
+		},
+		{
+			"name": "Gempa Terbaru",
+			"url": "/earthquakes"
+		}
+	]
+}

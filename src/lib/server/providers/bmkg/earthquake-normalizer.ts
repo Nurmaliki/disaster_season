@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { DisasterEvent, Severity } from '$lib/types';
-import type { BmkgRawQuake }  from '$lib/server/providers/bmkg/earthquake';
-import { shakemapUrl }  from '$lib/server/providers/bmkg/earthquake';
+import type { BmkgRawQuake } from '$lib/server/providers/bmkg/earthquake';
+import { shakemapUrl } from '$lib/server/providers/bmkg/earthquake';
 
 const SOURCE_NAME = 'BMKG';
 const SOURCE_URL = 'https://www.bmkg.go.id/gempabumi/gempabumi-terkini.bmkg';
@@ -123,7 +123,9 @@ export function normalizeEarthquakes(
 		const severity = magnitudeSeverity(magnitude);
 
 		const title =
-			magnitude !== null ? `Gempa M${magnitude.toFixed(1)} — ${record.Wilayah ?? 'Indonesia'}` : `Gempa — ${record.Wilayah ?? 'Indonesia'}`;
+			magnitude !== null
+				? `Gempa M${magnitude.toFixed(1)} — ${record.Wilayah ?? 'Indonesia'}`
+				: `Gempa — ${record.Wilayah ?? 'Indonesia'}`;
 
 		const parts: string[] = [];
 		if (magnitude !== null) parts.push(`Magnitudo ${magnitude.toFixed(1)}`);

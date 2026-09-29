@@ -104,7 +104,9 @@ describe('CAP alert parsing (live BMKG fixture)', () => {
 		const alert = parseCapAlert(cap, 'https://example.test/alert.xml');
 		expect(alert.effective).toBeTruthy();
 		expect(alert.expires).toBeTruthy();
-		expect(new Date(alert.expires!).getTime()).toBeGreaterThan(new Date(alert.effective!).getTime());
+		expect(new Date(alert.expires!).getTime()).toBeGreaterThan(
+			new Date(alert.effective!).getTime()
+		);
 	});
 });
 

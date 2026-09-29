@@ -35,7 +35,13 @@ export const DATA_CATEGORIES = [
 	'risk'
 ] as const satisfies readonly DataCategory[];
 
-export const SEVERITIES = ['unknown', 'low', 'moderate', 'high', 'critical'] as const satisfies readonly Severity[];
+export const SEVERITIES = [
+	'unknown',
+	'low',
+	'moderate',
+	'high',
+	'critical'
+] as const satisfies readonly Severity[];
 
 /** Geographic bounds matching Indonesia, padded slightly for border events. */
 export const LAT_RANGE = { min: -12, max: 8 } as const;
@@ -79,12 +85,30 @@ export const eventFilterSchema = z.object({
 	provinces: z
 		.string()
 		.optional()
-		.transform((raw) => (raw ? raw.split(',').map((v) => v.trim()).filter(Boolean) : undefined)),
+		.transform((raw) =>
+			raw
+				? raw
+						.split(',')
+						.map((v) => v.trim())
+						.filter(Boolean)
+				: undefined
+		),
 	sources: z
 		.string()
 		.optional()
-		.transform((raw) => (raw ? raw.split(',').map((v) => v.trim()).filter(Boolean) : undefined)),
-	sinceHours: z.coerce.number().min(0).max(24 * 365).optional(),
+		.transform((raw) =>
+			raw
+				? raw
+						.split(',')
+						.map((v) => v.trim())
+						.filter(Boolean)
+				: undefined
+		),
+	sinceHours: z.coerce
+		.number()
+		.min(0)
+		.max(24 * 365)
+		.optional(),
 	limit: z.coerce.number().int().min(1).max(2000).optional()
 });
 
@@ -144,7 +168,9 @@ export function parseQuery<T extends z.ZodType>(
 		const first = result.error.issues[0];
 		return {
 			ok: false,
-			message: first ? `${first.path.join('.') || 'parameter'}: ${first.message}` : 'Parameter tidak valid'
+			message: first
+				? `${first.path.join('.') || 'parameter'}: ${first.message}`
+				: 'Parameter tidak valid'
 		};
 	}
 	return { ok: true, data: result.data };

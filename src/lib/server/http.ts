@@ -1,4 +1,4 @@
-import { logger }  from '$lib/server/logger';
+import { logger } from '$lib/server/logger';
 
 export class HttpError extends Error {
 	readonly status: number;
@@ -132,7 +132,11 @@ export async function fetchJson<T = unknown>(
 					throw new HttpError(
 						`Upstream responded ${response.status}`,
 						response.status,
-						response.status === 404 ? 'NOT_FOUND' : response.status === 429 ? 'RATE_LIMIT' : 'PROVIDER_ERROR'
+						response.status === 404
+							? 'NOT_FOUND'
+							: response.status === 429
+								? 'RATE_LIMIT'
+								: 'PROVIDER_ERROR'
 					);
 				}
 
@@ -183,12 +187,14 @@ export async function fetchJson<T = unknown>(
 	const promise = run();
 	if (dedupe && method === 'GET') {
 		inflight.set(key, { promise, createdAt: Date.now() });
-		promise.finally(() => {
-			// Keep the entry briefly so bursts collapse, then release.
-			setTimeout(() => {
-				if (inflight.get(key)?.promise === promise) inflight.delete(key);
-			}, 500);
-		}).catch(() => {});
+		promise
+			.finally(() => {
+				// Keep the entry briefly so bursts collapse, then release.
+				setTimeout(() => {
+					if (inflight.get(key)?.promise === promise) inflight.delete(key);
+				}, 500);
+			})
+			.catch(() => {});
 		promise.catch(() => {});
 	}
 

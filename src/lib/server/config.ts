@@ -91,9 +91,18 @@ export const config = {
  */
 export const publicConfig = {
 	map: {
-		styleUrl: str(env.PUBLIC_MAP_STYLE_URL, 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'),
-		darkStyleUrl: str(env.PUBLIC_MAP_STYLE_DARK_URL, 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'),
-		lightStyleUrl: str(env.PUBLIC_MAP_STYLE_LIGHT_URL, 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json')
+		styleUrl: str(
+			env.PUBLIC_MAP_STYLE_URL,
+			'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+		),
+		darkStyleUrl: str(
+			env.PUBLIC_MAP_STYLE_DARK_URL,
+			'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+		),
+		lightStyleUrl: str(
+			env.PUBLIC_MAP_STYLE_LIGHT_URL,
+			'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+		)
 	}
 } as const;
 

@@ -1,6 +1,6 @@
-import { fetchJson, HttpError, type FetchOptions }  from '$lib/server/http';
-import { logger }  from '$lib/server/logger';
-import { config }  from '$lib/server/config';
+import { fetchJson, HttpError, type FetchOptions } from '$lib/server/http';
+import { logger } from '$lib/server/logger';
+import { config } from '$lib/server/config';
 
 /**
  * BMKG public weather forecast API.

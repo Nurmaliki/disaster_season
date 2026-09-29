@@ -10,12 +10,7 @@ export function toRadians(degrees: number): number {
 }
 
 /** Great-circle distance between two points in kilometres. */
-export function haversineKm(
-	lat1: number,
-	lon1: number,
-	lat2: number,
-	lon2: number
-): number {
+export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
 	const dLat = toRadians(lat2 - lat1);
 	const dLon = toRadians(lon2 - lon1);
 	const a =
@@ -38,7 +33,12 @@ export function withinRadius<T extends GeoPoint>(
 	const out: Array<T & { distanceKm: number }> = [];
 	for (const item of items) {
 		if (!Number.isFinite(item.latitude) || !Number.isFinite(item.longitude)) continue;
-		const distanceKm = haversineKm(center.latitude, center.longitude, item.latitude, item.longitude);
+		const distanceKm = haversineKm(
+			center.latitude,
+			center.longitude,
+			item.latitude,
+			item.longitude
+		);
 		if (distanceKm <= radiusKm) out.push({ ...item, distanceKm });
 	}
 	return out.sort((a, b) => a.distanceKm - b.distanceKm);

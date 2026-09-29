@@ -1,4 +1,4 @@
-import type { DisasterEvent, ProviderHealth, ProviderStatus } from '$lib/types';
+import type { ProviderHealth, ProviderStatus } from '$lib/types';
 
 /**
  * In-process provider health registry.

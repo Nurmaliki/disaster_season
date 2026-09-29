@@ -1,1 +1,207 @@
 @import 'tailwindcss';
+
+/*
+ * Tailwind v4 configuration lives in CSS.
+ * Dark mode is class-based so the theme toggle (and the pre-hydration script in
+ * app.html) can control it deterministically.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	/* Typography */
+	--font-sans:
+		'Inter var', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+		'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+	--font-mono: ui-monospace, 'SFMono-Regular', 'SF Mono', Menlo, Consolas, monospace;
+
+	/* Brand surface colours, tuned for both themes. */
+	--color-surface-0: #ffffff;
+	--color-surface-1: #f8fafc;
+	--color-surface-2: #f1f5f9;
+	--color-ink-0: #0f172a;
+	--color-ink-1: #334155;
+	--color-ink-2: #64748b;
+
+	/* Severity palette — shared by the map layers, chips and legends. */
+	--color-sev-critical: #dc2626;
+	--color-sev-high: #ea580c;
+	--color-sev-moderate: #d97706;
+	--color-sev-low: #0d9488;
+	--color-sev-unknown: #64748b;
+
+	/* Data-category palette. Forecast must never look like a warning. */
+	--color-cat-warning: #dc2626;
+	--color-cat-event: #ea580c;
+	--color-cat-observation: #7c3aed;
+	--color-cat-forecast: #2563eb;
+	--color-cat-hazard: #b45309;
+	--color-cat-history: #64748b;
+
+	--radius-card: 0.875rem;
+}
+
+/*
+ * Theme-aware semantic tokens.
+ * These flip with the `dark` class so components use one class name.
+ */
+@layer base {
+	:root {
+		--bg: var(--color-surface-1);
+		--bg-elevated: var(--color-surface-0);
+		--bg-subtle: var(--color-surface-2);
+		--fg: var(--color-ink-0);
+		--fg-muted: var(--color-ink-1);
+		--fg-subtle: var(--color-ink-2);
+		--border: #e2e8f0;
+		--border-strong: #cbd5e1;
+
+		color-scheme: light;
+	}
+
+	.dark {
+		--bg: #0b1220;
+		--bg-elevated: #111a2e;
+		--bg-subtle: #172136;
+		--fg: #e8eefc;
+		--fg-muted: #b8c4dc;
+		--fg-subtle: #8b9ab8;
+		--border: #24314d;
+		--border-strong: #344566;
+
+		color-scheme: dark;
+	}
+
+	html {
+		background-color: var(--bg);
+		-webkit-text-size-adjust: 100%;
+	}
+
+	body {
+		background-color: var(--bg);
+		color: var(--fg);
+		font-family: var(--font-sans);
+		/* Keep layout stable when scrollbars appear/disappear. */
+		scrollbar-gutter: stable;
+	}
+
+	/* Visible, consistent focus ring for keyboard users. */
+	:focus-visible {
+		outline: 2px solid #2563eb;
+		outline-offset: 2px;
+		border-radius: 4px;
+	}
+
+	/* Respect reduced-motion preferences across the app. */
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			animation-duration: 0.001ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.001ms !important;
+			scroll-behavior: auto !important;
+		}
+	}
+}
+
+@layer components {
+	/* Card surface used by almost every panel. */
+	.card {
+		background-color: var(--bg-elevated);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-card);
+	}
+
+	.card-subtle {
+		background-color: var(--bg-subtle);
+		border: 1px solid var(--border);
+		border-radius: var(--radius-card);
+	}
+
+	/* Small uppercase section label. */
+	.eyebrow {
+		font-size: 0.6875rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--fg-subtle);
+		font-weight: 600;
+	}
+
+	.text-muted {
+		color: var(--fg-muted);
+	}
+
+	.text-subtle {
+		color: var(--fg-subtle);
+	}
+
+	.divide-token {
+		border-color: var(--border);
+	}
+
+	.surface-elevated {
+		background-color: var(--bg-elevated);
+	}
+
+	.surface-subtle {
+		background-color: var(--bg-subtle);
+	}
+
+	.border-token {
+		border-color: var(--border);
+	}
+}
+
+/*
+ * MapLibre overrides.
+ * Kept here so the map container looks native in both themes without touching
+ * the library's own stylesheet.
+ */
+.maplibregl-popup-content {
+	background-color: var(--bg-elevated) !important;
+	color: var(--fg) !important;
+	border-radius: 0.75rem !important;
+	border: 1px solid var(--border) !important;
+	box-shadow: 0 10px 30px rgb(0 0 0 / 0.25) !important;
+	padding: 0 !important;
+	max-width: min(22rem, 90vw) !important;
+}
+
+.maplibregl-popup-tip {
+	border-top-color: var(--bg-elevated) !important;
+	border-bottom-color: var(--bg-elevated) !important;
+}
+
+.maplibregl-ctrl-group {
+	background-color: var(--bg-elevated) !important;
+	border: 1px solid var(--border) !important;
+}
+
+.maplibregl-ctrl-group button + button {
+	border-top-color: var(--border) !important;
+}
+
+.maplibregl-ctrl-attrib {
+	background-color: color-mix(in srgb, var(--bg-elevated) 85%, transparent) !important;
+	font-size: 10px !important;
+}
+
+.maplibregl-canvas:focus-visible {
+	outline-offset: -2px;
+}
+
+/* Thin, theme-aware scrollbars for panels. */
+.scroll-thin {
+	scrollbar-width: thin;
+	scrollbar-color: var(--border-strong) transparent;
+}
+
+.scroll-thin::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+.scroll-thin::-webkit-scrollbar-thumb {
+	background-color: var(--border-strong);
+	border-radius: 9999px;
+}

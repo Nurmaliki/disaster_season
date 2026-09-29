@@ -1,9 +1,10 @@
-import { config }  from '$lib/server/config';
+import { config } from '$lib/server/config';
 
 type Level = 'debug' | 'info' | 'warn' | 'error';
 
 const LEVELS: Record<Level, number> = { debug: 10, info: 20, warn: 30, error: 40 };
-const threshold = LEVELS[(config.logLevel as Level) in LEVELS ? (config.logLevel as Level) : 'info'];
+const threshold =
+	LEVELS[(config.logLevel as Level) in LEVELS ? (config.logLevel as Level) : 'info'];
 
 export interface LogFields {
 	provider?: string;

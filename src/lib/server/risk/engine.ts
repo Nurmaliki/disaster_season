@@ -1,5 +1,6 @@
 import type { DisasterEvent, RiskAssessment, RiskFactor } from '$lib/types';
 import { eventTimestamp } from '$lib/server/services/merge';
+import { RISK_DISCLAIMER, RISK_LEVEL_BANDS } from '$lib/utils/risk';
 
 /**
  * Risk Engine — transparent and fully configurable.
@@ -17,9 +18,7 @@ import { eventTimestamp } from '$lib/server/services/merge';
  * environment variables without touching the algorithm.
  */
 
-export const RISK_DISCLAIMER =
-	'Skor Risiko merupakan indikator aplikasi berdasarkan data yang tersedia dan bukan peringatan resmi. ' +
-	'Ikuti informasi resmi BMKG, BNPB, BPBD, dan PVMBG.';
+export { RISK_DISCLAIMER, RISK_LEVEL_BANDS };
 
 /**
  * Factor weights. Each factor is normalized to 0..1 before weighting, so the
@@ -42,13 +41,6 @@ export const RISK_WEIGHTS = {
 } as const;
 
 export type RiskFactorKey = keyof typeof RISK_WEIGHTS;
-
-export const RISK_LEVEL_BANDS = {
-	low: { min: 0, max: 25, label: 'Rendah' },
-	moderate: { min: 26, max: 50, label: 'Sedang' },
-	high: { min: 51, max: 75, label: 'Tinggi' },
-	very_high: { min: 76, max: 100, label: 'Sangat Tinggi' }
-} as const;
 
 const SEVERITY_TO_VALUE: Record<DisasterEvent['severity'], number> = {
 	critical: 1,

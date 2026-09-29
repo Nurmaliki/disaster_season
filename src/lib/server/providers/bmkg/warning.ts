@@ -1,6 +1,6 @@
 import { fetchJson } from '$lib/server/http';
 import { logger } from '$lib/server/logger';
-import { parseXml, findAll, find, text, localName, type XmlNode } from '$lib/server/xml';
+import { parseXml, findAll, find, text, localName } from '$lib/server/xml';
 
 /**
  * BMKG early weather warnings (CAP — Common Alerting Protocol).
@@ -185,7 +185,11 @@ export function capPolygonsToMultiPolygon(polygons: string[]): GeoJSON.MultiPoly
 /* Fetching                                                          */
 /* ---------------------------------------------------------------- */
 
-export async function fetchCapRss(): Promise<{ data: CapAlertRef[]; url: string; durationMs: number }> {
+export async function fetchCapRss(): Promise<{
+	data: CapAlertRef[];
+	url: string;
+	durationMs: number;
+}> {
 	const result = await fetchJson<string>(CAP_RSS_URL, {
 		parse: 'text',
 		accept: 'application/rss+xml, application/xml, text/xml',

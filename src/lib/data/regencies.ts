@@ -79,7 +79,7 @@ export function searchRegions(query: string, limit = 12): RegionRef[] {
 
 	const consider = (region: RegionRef): void => {
 		const haystack = normalize(region.name);
-		let score = 0;
+		let score: number;
 
 		if (haystack === needle) score = 100;
 		else if (haystack.startsWith(needle)) score = 80;
@@ -270,10 +270,20 @@ export const REGENCIES: RegencyEntry[] = [
 	{ code: '16.06', name: 'Kabupaten Musi Banyuasin', latitude: -2.55, longitude: 103.65 },
 	{ code: '16.07', name: 'Kabupaten Banyuasin', latitude: -2.35, longitude: 104.55 },
 	{ code: '16.08', name: 'Kabupaten Ogan Komering Ulu Timur', latitude: -4.05, longitude: 104.55 },
-	{ code: '16.09', name: 'Kabupaten Ogan Komering Ulu Selatan', latitude: -4.65, longitude: 103.85 },
+	{
+		code: '16.09',
+		name: 'Kabupaten Ogan Komering Ulu Selatan',
+		latitude: -4.65,
+		longitude: 103.85
+	},
 	{ code: '16.10', name: 'Kabupaten Ogan Ilir', latitude: -3.35, longitude: 104.65 },
 	{ code: '16.11', name: 'Kabupaten Empat Lawang', latitude: -3.55, longitude: 103.05 },
-	{ code: '16.12', name: 'Kabupaten Penukal Abab Lematang Ilir', latitude: -3.15, longitude: 104.05 },
+	{
+		code: '16.12',
+		name: 'Kabupaten Penukal Abab Lematang Ilir',
+		latitude: -3.15,
+		longitude: 104.05
+	},
 	{ code: '16.13', name: 'Kabupaten Musi Rawas Utara', latitude: -2.65, longitude: 102.85 },
 	{ code: '16.71', name: 'Kota Palembang', latitude: -2.99, longitude: 104.76 },
 	{ code: '16.72', name: 'Kota Pagar Alam', latitude: -4.02, longitude: 103.25 },
@@ -328,7 +338,12 @@ export const REGENCIES: RegencyEntry[] = [
 	{ code: '21.72', name: 'Kota Tanjung Pinang', latitude: 0.92, longitude: 104.45 },
 
 	// DKI Jakarta (31)
-	{ code: '31.01', name: 'Kabupaten Administrasi Kepulauan Seribu', latitude: -5.6, longitude: 106.55 },
+	{
+		code: '31.01',
+		name: 'Kabupaten Administrasi Kepulauan Seribu',
+		latitude: -5.6,
+		longitude: 106.55
+	},
 	{ code: '31.71', name: 'Kota Adm. Jakarta Pusat', latitude: -6.18, longitude: 106.83 },
 	{ code: '31.72', name: 'Kota Adm. Jakarta Utara', latitude: -6.12, longitude: 106.9 },
 	{ code: '31.73', name: 'Kota Adm. Jakarta Barat', latitude: -6.17, longitude: 106.75 },
@@ -580,7 +595,12 @@ export const REGENCIES: RegencyEntry[] = [
 	{ code: '71.06', name: 'Kabupaten Minahasa Utara', latitude: 1.45, longitude: 125.05 },
 	{ code: '71.07', name: 'Kabupaten Minahasa Tenggara', latitude: 1.05, longitude: 124.75 },
 	{ code: '71.08', name: 'Kabupaten Bolaang Mongondow Utara', latitude: 0.85, longitude: 123.55 },
-	{ code: '71.09', name: 'Kabupaten Kepulauan Siau Tagulandang Biaro', latitude: 2.65, longitude: 125.4 },
+	{
+		code: '71.09',
+		name: 'Kabupaten Kepulauan Siau Tagulandang Biaro',
+		latitude: 2.65,
+		longitude: 125.4
+	},
 	{ code: '71.10', name: 'Kabupaten Bolaang Mongondow Timur', latitude: 0.75, longitude: 124.55 },
 	{ code: '71.11', name: 'Kabupaten Bolaang Mongondow Selatan', latitude: 0.35, longitude: 123.85 },
 	{ code: '71.71', name: 'Kota Manado', latitude: 1.47, longitude: 124.84 },

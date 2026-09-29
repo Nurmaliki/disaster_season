@@ -20,15 +20,19 @@ const MAX_XML_BYTES = 8 * 1024 * 1024;
 const MAX_DEPTH = 64;
 
 function decodeEntities(value: string): string {
-	return value
-		.replace(/&lt;/g, '<')
-		.replace(/&gt;/g, '>')
-		.replace(/&quot;/g, '"')
-		.replace(/&apos;/g, "'")
-		.replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number.parseInt(code, 10)))
-		.replace(/&#x([0-9a-fA-F]+);/g, (_, code: string) => String.fromCodePoint(Number.parseInt(code, 16)))
-		// &amp; must be decoded last so it cannot re-introduce markup
-		.replace(/&amp;/g, '&');
+	return (
+		value
+			.replace(/&lt;/g, '<')
+			.replace(/&gt;/g, '>')
+			.replace(/&quot;/g, '"')
+			.replace(/&apos;/g, "'")
+			.replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number.parseInt(code, 10)))
+			.replace(/&#x([0-9a-fA-F]+);/g, (_, code: string) =>
+				String.fromCodePoint(Number.parseInt(code, 16))
+			)
+			// &amp; must be decoded last so it cannot re-introduce markup
+			.replace(/&amp;/g, '&')
+	);
 }
 
 /**

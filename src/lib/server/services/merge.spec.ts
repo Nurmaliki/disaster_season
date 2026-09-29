@@ -92,14 +92,46 @@ describe('event merging', () => {
 		const event = makeEvent({ id: 'shared', source: { name: 'BMKG', priority: 100 } });
 		const other = makeEvent({ id: 'shared', source: { name: 'BPBD', priority: 50 } });
 
-		const merged = mergeEvents([
-			makePayload('a', [event], 100),
-			makePayload('b', [other], 50)
-		]);
+		const merged = mergeEvents([makePayload('a', [event], 100), makePayload('b', [other], 50)]);
 
 		const provenance = merged[0].metadata?.provenance as Array<{ source: string }> | undefined;
 		expect(provenance).toBeDefined();
 		expect(provenance!.map((p) => p.source).sort()).toEqual(['BMKG', 'BPBD']);
+	});
+
+	it('never returns two events with the same id, even from different source ids', () => {
+		// Reproduces the BMKG cross-feed case: the same physical quake published
+		// with different guids (or a guid in one feed and a hash in another) has
+		// two distinct source ids but the SAME internal id after normalization.
+		const fromListFeed = makeEvent({
+			id: 'bmkg:quake:abc',
+			source: { name: 'BMKG', sourceId: 'guid-a', priority: 100 }
+		});
+		const fromLatestFeed = makeEvent({
+			id: 'bmkg:quake:abc',
+			source: { name: 'BMKG', sourceId: 'guid-b', priority: 100 }
+		});
+
+		const merged = mergeEvents([
+			makePayload('a', [fromListFeed]),
+			makePayload('b', [fromLatestFeed])
+		]);
+
+		const ids = merged.map((event) => event.id);
+		expect(new Set(ids).size).toBe(ids.length);
+
+		// The first keeps the original id; the second is disambiguated but still
+		// derived from it, so ids stay stable and human-traceable.
+		expect(ids[0]).toBe('bmkg:quake:abc');
+		expect(ids[1]).toMatch(/^bmkg:quake:abc#\d+$/);
+	});
+
+	it('produces stable ids for the same input ordering', () => {
+		const a = makeEvent({ id: 'dup', source: { name: 'BMKG', sourceId: 'a' } });
+		const b = makeEvent({ id: 'dup', source: { name: 'BMKG', sourceId: 'b' } });
+		const first = mergeEvents([makePayload('a', [a]), makePayload('b', [b])]).map((e) => e.id);
+		const second = mergeEvents([makePayload('a', [a]), makePayload('b', [b])]).map((e) => e.id);
+		expect(first).toEqual(second);
 	});
 });
 

@@ -1,5 +1,5 @@
 import type { Severity } from '$lib/types';
-import type { BmkgWeatherPoint, BmkgWeatherResponse }  from '$lib/server/providers/bmkg/weather';
+import type { BmkgWeatherPoint, BmkgWeatherResponse } from '$lib/server/providers/bmkg/weather';
 
 const SOURCE_NAME = 'BMKG';
 const SOURCE_URL = 'https://www.bmkg.go.id/cuaca/prakiraan-cuaca.bmkg';
@@ -104,7 +104,10 @@ const DAY_LABELS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabt
  * which is an array of slots. We flatten it and de-duplicate by timestamp,
  * because consecutive groups can overlap.
  */
-export function normalizeWeather(payload: BmkgWeatherResponse, retrievedAt: string): NormalizedWeather {
+export function normalizeWeather(
+	payload: BmkgWeatherResponse,
+	retrievedAt: string
+): NormalizedWeather {
 	const timezone = payload.lokasi?.timezone ?? 'Asia/Jakarta';
 
 	const flat: BmkgWeatherPoint[] = [];
@@ -138,7 +141,12 @@ export function normalizeWeather(payload: BmkgWeatherResponse, retrievedAt: stri
 	// Group by local calendar day for the daily rollup.
 	const dayBuckets = new Map<
 		string,
-		{ temps: number[]; precipitation: number[]; conditions: Map<string, number>; icon: string | null }
+		{
+			temps: number[];
+			precipitation: number[];
+			conditions: Map<string, number>;
+			icon: string | null;
+		}
 	>();
 	for (const slot of slots) {
 		const localDate = (slot.localDatetime || slot.datetime).slice(0, 10);
@@ -149,7 +157,8 @@ export function normalizeWeather(payload: BmkgWeatherResponse, retrievedAt: stri
 		}
 		if (slot.temperatureC !== null) bucket.temps.push(slot.temperatureC);
 		if (slot.precipitationMm !== null) bucket.precipitation.push(slot.precipitationMm);
-		if (slot.condition) bucket.conditions.set(slot.condition, (bucket.conditions.get(slot.condition) ?? 0) + 1);
+		if (slot.condition)
+			bucket.conditions.set(slot.condition, (bucket.conditions.get(slot.condition) ?? 0) + 1);
 		if (!bucket.icon && slot.iconUrl) bucket.icon = slot.iconUrl;
 	}
 
@@ -167,7 +176,7 @@ export function normalizeWeather(payload: BmkgWeatherResponse, retrievedAt: stri
 			const parsedDate = new Date(`${date}T00:00:00+07:00`);
 			const label = Number.isNaN(parsedDate.getTime())
 				? date
-				: DAY_LABELS[parsedDate.getUTCDay()] ?? date;
+				: (DAY_LABELS[parsedDate.getUTCDay()] ?? date);
 			return {
 				date,
 				label,

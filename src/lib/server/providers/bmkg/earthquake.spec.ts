@@ -90,8 +90,18 @@ describe('earthquake identity', () => {
 	});
 
 	it('produces different ids for genuinely different events', () => {
-		const a = earthquakeEventId({ DateTime: '2026-01-01T00:00:00Z', Coordinates: '1,100', Magnitude: '5', Kedalaman: '10 km' } as never);
-		const b = earthquakeEventId({ DateTime: '2026-01-01T00:00:00Z', Coordinates: '2,101', Magnitude: '5', Kedalaman: '10 km' } as never);
+		const a = earthquakeEventId({
+			DateTime: '2026-01-01T00:00:00Z',
+			Coordinates: '1,100',
+			Magnitude: '5',
+			Kedalaman: '10 km'
+		} as never);
+		const b = earthquakeEventId({
+			DateTime: '2026-01-01T00:00:00Z',
+			Coordinates: '2,101',
+			Magnitude: '5',
+			Kedalaman: '10 km'
+		} as never);
 		expect(a).not.toBe(b);
 	});
 });
@@ -100,7 +110,9 @@ describe('earthquake normalization against live BMKG fixtures', () => {
 	const retrievedAt = '2026-09-29T09:00:00.000Z';
 
 	it('normalizes the latest event feed', () => {
-		const events = normalizeEarthquakes(toArray(autogempa) as never, retrievedAt, { feed: 'autogempa' });
+		const events = normalizeEarthquakes(toArray(autogempa) as never, retrievedAt, {
+			feed: 'autogempa'
+		});
 		expect(events).toHaveLength(1);
 		const [event] = events;
 		expect(event.type).toBe('earthquake');
@@ -112,7 +124,9 @@ describe('earthquake normalization against live BMKG fixtures', () => {
 	});
 
 	it('normalizes the recent-events feed', () => {
-		const events = normalizeEarthquakes(toArray(gempaterkini) as never, retrievedAt, { feed: 'gempaterkini' });
+		const events = normalizeEarthquakes(toArray(gempaterkini) as never, retrievedAt, {
+			feed: 'gempaterkini'
+		});
 		expect(events.length).toBeGreaterThan(5);
 		for (const event of events) {
 			expect(event.occurredAt).toBeTruthy();
@@ -122,7 +136,9 @@ describe('earthquake normalization against live BMKG fixtures', () => {
 	});
 
 	it('emits GeoJSON with longitude first', () => {
-		const events = normalizeEarthquakes(toArray(autogempa) as never, retrievedAt, { feed: 'autogempa' });
+		const events = normalizeEarthquakes(toArray(autogempa) as never, retrievedAt, {
+			feed: 'autogempa'
+		});
 		const coords = events[0].geometry?.type === 'Point' ? events[0].geometry.coordinates : [];
 		expect(coords[0]).toBeCloseTo(94.41, 2); // longitude
 		expect(coords[1]).toBeCloseTo(5.19, 2); // latitude
@@ -138,7 +154,9 @@ describe('earthquake normalization against live BMKG fixtures', () => {
 	});
 
 	it('never invents a tsunami prediction, only mirrors BMKG wording', () => {
-		const events = normalizeEarthquakes(toArray(autogempa) as never, retrievedAt, { feed: 'autogempa' });
+		const events = normalizeEarthquakes(toArray(autogempa) as never, retrievedAt, {
+			feed: 'autogempa'
+		});
 		const [event] = events;
 		expect(typeof event.metadata?.tsunamiPotential).toBe('boolean');
 		expect(event.metadata?.tsunamiPotentialText).toBeTruthy();

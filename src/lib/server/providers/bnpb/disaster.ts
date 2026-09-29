@@ -129,7 +129,8 @@ export function bnpbImpactSeverity(record: BnpbRawDisaster): {
 
 function toInt(value: unknown): number | null {
 	if (value === undefined || value === null || value === '') return null;
-	const numeric = typeof value === 'number' ? value : Number.parseInt(String(value).replace(/\D/g, ''), 10);
+	const numeric =
+		typeof value === 'number' ? value : Number.parseInt(String(value).replace(/\D/g, ''), 10);
 	return Number.isFinite(numeric) ? numeric : null;
 }
 
@@ -188,8 +189,14 @@ export function normalizeBnpbDisasters(
 	const now = Date.now();
 
 	for (const record of records) {
-		const lat = typeof record.latitude === 'number' ? record.latitude : Number.parseFloat(String(record.latitude ?? ''));
-		const lon = typeof record.longitude === 'number' ? record.longitude : Number.parseFloat(String(record.longitude ?? ''));
+		const lat =
+			typeof record.latitude === 'number'
+				? record.latitude
+				: Number.parseFloat(String(record.latitude ?? ''));
+		const lon =
+			typeof record.longitude === 'number'
+				? record.longitude
+				: Number.parseFloat(String(record.longitude ?? ''));
 		if (!isPlausibleIndonesianCoordinate(lat, lon)) continue;
 
 		const occurredAt = parseBnpbDate(record.tanggal, record.waktu);
@@ -207,7 +214,8 @@ export function normalizeBnpbDisasters(
 		);
 		const place = regionParts.length ? regionParts.join(', ') : 'Indonesia';
 
-		const externalId = record.id !== undefined ? String(record.id) : `${occurredAt}-${lat}-${lon}-${type}`;
+		const externalId =
+			record.id !== undefined ? String(record.id) : `${occurredAt}-${lat}-${lon}-${type}`;
 
 		events.push({
 			id: `bnpb:disaster:${externalId}`,

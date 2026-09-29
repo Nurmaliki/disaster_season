@@ -26,13 +26,7 @@ export type DisasterType =
  * a FORECAST is never a warning, a HAZARD MAP is never a current event.
  */
 export type DataCategory =
-	| 'forecast'
-	| 'early_warning'
-	| 'current_event'
-	| 'observation'
-	| 'historical'
-	| 'hazard'
-	| 'risk';
+	'forecast' | 'early_warning' | 'current_event' | 'observation' | 'historical' | 'hazard' | 'risk';
 
 export type Severity = 'unknown' | 'low' | 'moderate' | 'high' | 'critical';
 

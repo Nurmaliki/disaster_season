@@ -2,7 +2,15 @@
 // for information about these interfaces
 declare global {
 	namespace App {
-		// interface Error {}
+		/**
+		 * Shape of the error surfaced to `+error.svelte`. `status` and `message`
+		 * are always present in SvelteKit; we keep them explicit for readability.
+		 */
+		interface Error {
+			status?: number;
+			message: string;
+		}
+
 		// interface Locals {}
 		// interface PageData {}
 		// interface PageState {}

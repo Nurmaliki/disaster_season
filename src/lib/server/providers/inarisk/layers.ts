@@ -53,14 +53,17 @@ export interface InariskRawFeature {
 }
 
 /** Maps InaRISK's published class index to our severity vocabulary. */
-export function inariskClassToSeverity(value: string | number | undefined): DisasterEvent['severity'] {
+export function inariskClassToSeverity(
+	value: string | number | undefined
+): DisasterEvent['severity'] {
 	if (value === undefined || value === null) return 'unknown';
 	const text = String(value).toLowerCase().trim();
 
 	// Textual class labels used by several InaRISK layers.
 	if (text.includes('sangat tinggi') || text.includes('very high')) return 'critical';
 	if (text.includes('tinggi') || text.includes('high')) return 'high';
-	if (text.includes('sedang') || text.includes('menengah') || text.includes('moderate')) return 'moderate';
+	if (text.includes('sedang') || text.includes('menengah') || text.includes('moderate'))
+		return 'moderate';
 	if (text.includes('rendah') || text.includes('low')) return 'low';
 
 	// Numeric class bands (InaRISK uses 3- and 5-class schemes).

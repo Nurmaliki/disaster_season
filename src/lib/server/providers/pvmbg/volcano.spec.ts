@@ -98,8 +98,14 @@ describe('volcano normalizer', () => {
 	});
 
 	it('generates stable ids across runs', () => {
-		const a = normalizeVolcanoes([{ name: 'Semeru', region: '', level: 'III', levelLabel: '' }], retrievedAt);
-		const b = normalizeVolcanoes([{ name: 'Semeru', region: '', level: 'III', levelLabel: '' }], retrievedAt);
+		const a = normalizeVolcanoes(
+			[{ name: 'Semeru', region: '', level: 'III', levelLabel: '' }],
+			retrievedAt
+		);
+		const b = normalizeVolcanoes(
+			[{ name: 'Semeru', region: '', level: 'III', levelLabel: '' }],
+			retrievedAt
+		);
 		expect(a[0].id).toBe(b[0].id);
 	});
 });

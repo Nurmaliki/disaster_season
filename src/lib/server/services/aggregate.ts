@@ -3,18 +3,22 @@ import { config } from '$lib/server/config';
 import { cached, cacheKey } from '$lib/server/cache/index';
 import { logger } from '$lib/server/logger';
 import { recordFailure, recordSuccess } from '$lib/server/services/health';
-import { mergeEvents, eventTimestamp, type NormalizedProviderPayload } from '$lib/server/services/merge';
+import {
+	mergeEvents,
+	eventTimestamp,
+	type NormalizedProviderPayload
+} from '$lib/server/services/merge';
 import type { AggregateResult, EventQuery } from '$lib/server/services/types';
 
-import {
-	fetchEarthquakeFeed,
-	type EarthquakeFeed
-} from '$lib/server/providers/bmkg/earthquake';
+import { fetchEarthquakeFeed, type EarthquakeFeed } from '$lib/server/providers/bmkg/earthquake';
 import { normalizeEarthquakes } from '$lib/server/providers/bmkg/earthquake-normalizer';
 import { fetchCapRss, fetchCapAlerts } from '$lib/server/providers/bmkg/warning';
 import { normalizeWarnings } from '$lib/server/providers/bmkg/warning-normalizer';
 import { fetchWeather } from '$lib/server/providers/bmkg/weather';
-import { normalizeWeather, type NormalizedWeather } from '$lib/server/providers/bmkg/weather-normalizer';
+import {
+	normalizeWeather,
+	type NormalizedWeather
+} from '$lib/server/providers/bmkg/weather-normalizer';
 import { fetchVolcanoActivity } from '$lib/server/providers/pvmbg/volcano';
 import { normalizeVolcanoes } from '$lib/server/providers/pvmbg/volcano-normalizer';
 import { probeInarisk } from '$lib/server/providers/inarisk/layers';
@@ -64,17 +68,46 @@ export async function syncEarthquakes(): Promise<NormalizedProviderPayload> {
 			throw new Error(`All earthquake feeds failed: ${failures.join(', ')}`);
 		}
 
+		// De-duplicate ACROSS feeds.
+		//
+		// BMKG publishes the same earthquake in multiple feeds (autogempa,
+		// gempaterkini, gempadirasakan), and each feed can carry a different
+		// `guid` (or none at all, forcing a content hash). Concatenating the
+		// feeds therefore produced duplicate ids, which broke keyed rendering.
+		//
+		// We key on the immutable physical characteristics of the quake, which
+		// are identical across feeds, and keep the richer record: a
+		// `current_event` (autogempa) beats a `historical` record.
+		const deduped: DisasterEvent[] = [];
+		const indexByIdentity = new Map<string, number>();
+		for (const event of events) {
+			const identity = quakeIdentity(event);
+			const existingIndex = indexByIdentity.get(identity);
+			if (existingIndex === undefined) {
+				indexByIdentity.set(identity, deduped.length);
+				deduped.push(event);
+				continue;
+			}
+			const existing = deduped[existingIndex];
+			if (rankCategory(event.category) > rankCategory(existing.category)) {
+				deduped[existingIndex] = event;
+			}
+		}
+
+		const removed = events.length - deduped.length;
+
 		recordSuccess(provider, Date.now() - started);
 		logger.info('sync earthquakes ok', {
 			provider,
-			count: events.length,
+			count: deduped.length,
+			duplicatesRemoved: removed,
 			durationMs: Date.now() - started,
 			failedFeeds: failures.length
 		});
 
 		return {
 			provider,
-			events,
+			events: deduped,
 			priority: 100,
 			retrievedAt,
 			cached: false,
@@ -87,6 +120,35 @@ export async function syncEarthquakes(): Promise<NormalizedProviderPayload> {
 		logger.error('sync earthquakes failed', { provider, error });
 		throw error;
 	}
+}
+
+/**
+ * Cross-feed identity for an earthquake.
+ *
+ * BMKG's `guid` is not stable across feeds, so we key on the physical
+ * characteristics of the quake (occurrence time, epicentre, magnitude, depth),
+ * which are identical everywhere the same event is published.
+ */
+function quakeIdentity(event: DisasterEvent): string {
+	const meta = event.metadata ?? {};
+	return [
+		event.occurredAt ?? '',
+		event.location.latitude,
+		event.location.longitude,
+		meta.magnitude ?? '',
+		meta.depthKm ?? ''
+	].join('|');
+}
+
+/**
+ * Ranking used to decide which duplicate record to keep. A live/occurred event
+ * is preferred over a historical record of the same quake.
+ */
+function rankCategory(category: DisasterEvent['category']): number {
+	if (category === 'current_event' || category === 'early_warning') return 3;
+	if (category === 'observation') return 2;
+	if (category === 'historical') return 1;
+	return 0;
 }
 
 /** Fetches and normalizes BMKG CAP early warnings. */
@@ -316,7 +378,8 @@ export async function aggregateEvents(
 	};
 
 	settled.forEach((outcome, index) => {
-		const providerId = ['bmkg-earthquake', 'bmkg-warning', 'pvmbg-volcano'][index] ?? `provider-${index}`;
+		const providerId =
+			['bmkg-earthquake', 'bmkg-warning', 'pvmbg-volcano'][index] ?? `provider-${index}`;
 
 		if (outcome.status === 'fulfilled') {
 			payloads.push(outcome.value);
@@ -330,7 +393,8 @@ export async function aggregateEvents(
 				stale: outcome.value.stale,
 				error: outcome.value.error
 			});
-			if (outcome.value.error) warnings.push(`${names[outcome.value.provider]}: ${outcome.value.error}`);
+			if (outcome.value.error)
+				warnings.push(`${names[outcome.value.provider]}: ${outcome.value.error}`);
 		} else {
 			sources.push({
 				provider: providerId,
@@ -412,9 +476,7 @@ export function queryEvents(events: DisasterEvent[], query: EventQuery = {}): Di
 			// Events without a known location (0,0 placeholder) are excluded from
 			// geographic queries rather than being treated as off West Africa.
 			if (latitude === 0 && longitude === 0) return false;
-			return (
-				longitude >= minLon && longitude <= maxLon && latitude >= minLat && latitude <= maxLat
-			);
+			return longitude >= minLon && longitude <= maxLon && latitude >= minLat && latitude <= maxLat;
 		});
 	}
 
@@ -422,5 +484,21 @@ export function queryEvents(events: DisasterEvent[], query: EventQuery = {}): Di
 		result = result.slice(0, query.limit);
 	}
 
-	return result;
+	// Final safety net: every consumer keys lists on `event.id`, so the query
+	// result must never contain a duplicate id. `mergeEvents` already guarantees
+	// this, but queries can be applied to arbitrary event arrays (e.g. cached
+	// payloads), so we defend here too.
+	return dedupeById(result);
+}
+
+/** Removes duplicate ids, keeping the first occurrence. */
+function dedupeById(events: DisasterEvent[]): DisasterEvent[] {
+	const seen = new Set<string>();
+	const out: DisasterEvent[] = [];
+	for (const event of events) {
+		if (seen.has(event.id)) continue;
+		seen.add(event.id);
+		out.push(event);
+	}
+	return out;
 }

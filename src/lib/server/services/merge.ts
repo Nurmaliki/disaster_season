@@ -58,7 +58,9 @@ export function mergeEvents(payloads: NormalizedProviderPayload[]): DisasterEven
 
 			// Record the competing source even when we keep the existing record.
 			const list = provenance.get(key) ?? [];
-			if (!list.some((p) => p.source === event.source.name && p.sourceId === event.source.sourceId)) {
+			if (
+				!list.some((p) => p.source === event.source.name && p.sourceId === event.source.sourceId)
+			) {
 				list.push({
 					source: event.source.name,
 					sourceId: event.source.sourceId,
@@ -85,7 +87,44 @@ export function mergeEvents(payloads: NormalizedProviderPayload[]): DisasterEven
 		}
 	}
 
-	return [...byKey.values()].sort(compareEvents);
+	return ensureUniqueIds([...byKey.values()]).sort(compareEvents);
+}
+
+/**
+ * Guarantees every returned event has a unique `id`.
+ *
+ * Distinct records can legitimately share an `id` when providers publish the
+ * same event under different source ids (or when the id falls back to a content
+ * hash computed from slightly different raw fields). The merge key
+ * (`source::sourceId`) keeps those records apart, but an `id` collision would
+ * then reach keyed UI lists and crash rendering, so we disambiguate here.
+ *
+ * The first occurrence keeps the original id; later collisions get a stable
+ * `#<n>` suffix derived from their position, so the id is deterministic for a
+ * given input set.
+ */
+function ensureUniqueIds(events: DisasterEvent[]): DisasterEvent[] {
+	const used = new Set<string>();
+	const out: DisasterEvent[] = [];
+
+	for (const event of events) {
+		if (!used.has(event.id)) {
+			used.add(event.id);
+			out.push(event);
+			continue;
+		}
+
+		let suffix = 2;
+		let candidate = `${event.id}#${suffix}`;
+		while (used.has(candidate)) {
+			suffix += 1;
+			candidate = `${event.id}#${suffix}`;
+		}
+		used.add(candidate);
+		out.push({ ...event, id: candidate });
+	}
+
+	return out;
 }
 
 const SEVERITY_RANK: Record<DisasterEvent['severity'], number> = {

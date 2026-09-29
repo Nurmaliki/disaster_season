@@ -1,6 +1,6 @@
-import { fetchJson }  from '$lib/server/http';
-import { logger }  from '$lib/server/logger';
-import { config }  from '$lib/server/config';
+import { fetchJson } from '$lib/server/http';
+import { logger } from '$lib/server/logger';
+import { config } from '$lib/server/config';
 
 /**
  * PVMBG / MAGMA Indonesia — volcanic activity levels.
@@ -91,7 +91,6 @@ export function parseActivityTable(html: string): VolcanoRaw[] {
 	const seen = new Set<string>();
 
 	let currentLevel: VolcanoLevel | null = null;
-	let currentLevelLabel = '';
 	let currentRecommendation: string | undefined;
 
 	// Split on row boundaries so heading text can't bleed into volcano names.
@@ -107,7 +106,6 @@ export function parseActivityTable(html: string): VolcanoRaw[] {
 		const levelMatch = rowText.match(/Level\s+(IV|III|II|I)\s*\(([^)]+)\)/i);
 		if (levelMatch && !/Lihat laporan/i.test(rowText)) {
 			currentLevel = levelMatch[1].toUpperCase() as VolcanoLevel;
-			currentLevelLabel = levelMatch[2].trim();
 			currentRecommendation = rowText
 				.replace(/Level\s+(IV|III|II|I)\s*\([^)]+\)/i, '')
 				.replace(/\b\d+\b\s*$/g, '')
@@ -151,7 +149,9 @@ export function parseActivityTable(html: string): VolcanoRaw[] {
 			level: currentLevel,
 			levelLabel: LEVEL_LABELS[currentLevel],
 			recommendation: currentRecommendation,
-			reportUrl: linkMatch ? new URL(linkMatch[1], 'https://magma.esdm.go.id').toString() : undefined
+			reportUrl: linkMatch
+				? new URL(linkMatch[1], 'https://magma.esdm.go.id').toString()
+				: undefined
 		});
 	}
 
