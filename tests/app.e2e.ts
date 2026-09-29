@@ -236,7 +236,9 @@ async function mockApi(page: Page): Promise<void> {
 					}
 				],
 				declaredCount: 1,
-				liveProbe: null
+				liveProbe: null,
+				persistence: { enabled: false, mode: 'stateless', retentionDays: null },
+				cache: { scope: 'per-instance', entries: 42 }
 			})
 		})
 	);
@@ -456,5 +458,39 @@ test.describe('events endpoint provenance', () => {
 		const body = await response.json();
 		expect(body.success).toBe(true);
 		expect(body.meta.searchedHistory).toBe(false);
+	});
+});
+
+test.describe('storage mode transparency', () => {
+	test('status API reports stateless mode and distinguishes cache from storage', async ({
+		request
+	}) => {
+		// The e2e server has no DATABASE_URL, so the API must admit it is stateless
+		// and must not present the response cache as durable storage.
+		const response = await request.get('/api/status');
+		expect(response.ok()).toBeTruthy();
+
+		const body = await response.json();
+		expect(body.data.persistence.mode).toBe('stateless');
+		expect(body.data.persistence.enabled).toBe(false);
+		expect(body.data.cache.scope).toBe('per-instance');
+		expect(typeof body.data.cache.entries).toBe('number');
+	});
+
+	test('status page shows the storage mode panel', async ({ page }) => {
+		await mockApi(page);
+		await page.goto('/status');
+
+		// Scope to the card that contains the panel heading, so the per-instance
+		// note in the provider table footer cannot collide (strict mode).
+		const panel = page.locator('.card').filter({ hasText: 'Mode Penyimpanan Data' }).first();
+
+		await expect(panel).toBeVisible();
+		await expect(panel.getByText('Riwayat Permanen: Tidak Aktif')).toBeVisible();
+		// The cache is labelled per-instance, so it cannot be mistaken for history.
+		// The entry count is time-dependent (SSR seed vs. refreshed payload), so we
+		// assert the label, not a fixed number.
+		await expect(panel.getByText(/Cache Respons:/)).toBeVisible();
+		await expect(panel.getByText(/per-instans/)).toBeVisible();
 	});
 });

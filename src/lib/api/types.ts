@@ -78,6 +78,15 @@ export interface StatusPayload {
 	}>;
 	declaredCount: number;
 	liveProbe: Record<string, unknown> | null;
+	persistence: {
+		enabled: boolean;
+		mode: 'stateless' | 'durable';
+		retentionDays: number | null;
+	};
+	cache: {
+		scope: 'per-instance';
+		entries: number;
+	};
 }
 
 export interface RiskPayload extends RiskAssessment {

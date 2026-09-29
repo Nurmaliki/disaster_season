@@ -181,6 +181,58 @@ through a `safely()` wrapper that degrades to the in-memory path on any error.
 `GET /api/status` reports the active mode under `persistence.mode`
 (`stateless` | `durable`).
 
+### Cache is not a database
+
+These are two separate mechanisms and it is important not to confuse them:
+
+|                                          | Response cache                                            | Durable storage (database)                   |
+| ---------------------------------------- | --------------------------------------------------------- | -------------------------------------------- |
+| Purpose                                  | Avoid re-calling upstream providers; survive rate limits  | Keep event history across restarts           |
+| Lifetime                                 | In-process, per instance; lost when the instance recycles | Persisted until the retention window elapses |
+| Capacity                                 | ~500 entries, oldest evicted automatically                | Bounded only by retention                    |
+| Required?                                | No — the app is correct without it                        | No — the app is correct without it           |
+| Backs `statistics` history?              | **No**                                                    | Yes                                          |
+| Backs **radius search** over old events? | **No**                                                    | Yes                                          |
+
+The cache is a **best-effort optimisation**. On serverless each instance keeps
+its own cache and instances are recycled, so a cache hit is never guaranteed and
+is never relied upon for correctness. Enlarging the cache does **not** substitute
+for a database — it would just make history that appears and disappears, which is
+worse than no history at all. `GET /api/status` exposes live cache statistics
+(`cache.entries`, `cache.scope: 'per-instance'`) so this is visible rather than
+implied. The `/status` page renders both modes side by side.
+
+**If persistence is off, the app still works completely** — you simply lose
+history that outlives the process.
+
+### Connecting a free PostgreSQL (Neon)
+
+The database is optional, and a free tier is enough for this app. Neon is a
+convenient choice because it is a plain PostgreSQL endpoint with no code changes
+required.
+
+1. Create a project at [neon.tech](https://neon.tech) (free tier) and copy the
+   **pooled** connection string.
+2. Run the migrations once against that database:
+   ```sh
+   DATABASE_URL='postgres://…-pooler.neon.tech/neondb?sslmode=require' \
+     npm run db:migrate
+   ```
+3. Add the same value as a `DATABASE_URL` environment variable in Vercel
+   (Settings → Environment Variables) and redeploy.
+
+Notes:
+
+- The migration enables the `cube` and `earthdistance` extensions for radius
+  search; **no PostGIS is required**. If your provider's role cannot create
+  extensions, the app still runs — it degrades to in-memory distance filtering
+  and says so via `searchedHistory: false`.
+- Use the **pooled** endpoint on serverless, so connections are reused between
+  invocations rather than exhausting the free tier's connection limit.
+- `DATABASE_URL` must never be prefixed `PUBLIC_`; it is server-only.
+- If the database is ever unreachable the app degrades to stateless rather than
+  failing — see `safely()` above.
+
 ### Spatial search
 
 When a database is configured, `GET /api/nearby` performs the radius search in
@@ -221,6 +273,47 @@ DATABASE_URL=postgres://user@localhost:5432/disaster_monitor npm run db:push
 
 The schema lives in `src/lib/server/db/schema.ts`; generated SQL migrations are
 committed under `drizzle/`.
+
+## Deploying to Vercel (free)
+
+The app deploys to the **Vercel Hobby plan at no cost** with the committed
+configuration. `@sveltejs/adapter-vercel` is already wired up and the build
+produces a valid Build Output API v3 bundle.
+
+```sh
+npx vercel          # preview deployment
+npx vercel --prod   # production deployment
+```
+
+No environment variables are required — the providers have official defaults
+baked into `config.ts`. Everything below is optional.
+
+**Why it fits inside the free tier:**
+
+- **No serverless function limit concerns.** The adapter emits a single function
+  bundle (~5 MB); the per-route `.func` entries are symlinks to it, not separate
+  functions.
+- **Cron is within the Hobby limit.** Hobby allows at most one cron run per day,
+  and `vercel.json` schedules `/api/maintenance/retention` daily at 17:00 UTC
+  (midnight WIB) — exactly one run. A more frequent schedule would fail the
+  deployment on Hobby.
+- **Build is fast and small** (~7 s, ~6 MB output; the function limit is 250 MB).
+
+**Optional variables:**
+
+| Variable       | Effect when set                                                                                             |
+| -------------- | ----------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL` | Enables durable history (see _Connecting a free PostgreSQL_).                                               |
+| `CRON_SECRET`  | Enables the retention pruner. When unset the endpoint refuses with 503 rather than running unauthenticated. |
+| `LOG_LEVEL`    | Adjusts log verbosity (default `info`).                                                                     |
+
+Notes:
+
+- Rate limiting and the response cache are **per instance** on serverless, so
+  they are best-effort guardrails rather than global quotas. This is expected and
+  documented above; the app never depends on them for correctness.
+- On Hobby, exceeding the free allowance **pauses** the project; it does not
+  auto-bill. Upgrade is never required for this app to function.
 
 ## Commands
 

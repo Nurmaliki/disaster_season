@@ -9,6 +9,7 @@ import {
 import { getSourceStatusView } from '$lib/server/services/dashboard';
 import { getAllProviderHealth, PROVIDER_DESCRIPTORS } from '$lib/server/services/health';
 import { isDatabaseEnabled } from '$lib/server/db/client';
+import { cache } from '$lib/server/cache';
 import { config } from '$lib/server/config';
 
 /**
@@ -59,6 +60,15 @@ export const GET: RequestHandler = async ({ url, request }) => {
 					/** Stateless means history is lost on restart — stated plainly. */
 					mode: isDatabaseEnabled() ? 'durable' : 'stateless',
 					retentionDays: isDatabaseEnabled() ? config.database.retentionDays : null
+				},
+				/**
+				 * The in-process response cache. Exposed so operators can see it is
+				 * per-instance and best-effort — NOT durable storage. A larger number
+				 * here is never a substitute for `DATABASE_URL`.
+				 */
+				cache: {
+					scope: 'per-instance' as const,
+					entries: cache.size
 				}
 			},
 			{

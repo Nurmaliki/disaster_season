@@ -7,7 +7,15 @@
 	import DataStatusBar from '$lib/components/ui/DataStatusBar.svelte';
 	import ErrorPanel from '$lib/components/ui/ErrorPanel.svelte';
 	import { formatDateTime, formatRelative } from '$lib/utils/format';
-	import { RefreshCw, CheckCircle2, AlertTriangle, XCircle, CircleDashed } from 'lucide-svelte';
+	import {
+		RefreshCw,
+		CheckCircle2,
+		AlertTriangle,
+		XCircle,
+		CircleDashed,
+		DatabaseZap,
+		Zap
+	} from 'lucide-svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -76,6 +84,51 @@
 	{#if error}
 		<ErrorPanel message={error} retry={() => refresh()} />
 	{/if}
+
+	<!-- Storage mode: makes the cache-vs-database distinction visible, so an
+	     operator can tell whether history survives a restart before relying on it. -->
+	<div class="card p-3">
+		<p class="eyebrow mb-2">Mode Penyimpanan Data</p>
+		<div class="grid gap-3 sm:grid-cols-2">
+			<div class="rounded-lg border border-[var(--border)] p-3">
+				<div class="mb-1 flex items-center gap-1.5">
+					{#if status.persistence.mode === 'durable'}
+						<DatabaseZap size={14} class="text-emerald-600 dark:text-emerald-400" />
+						<span class="text-xs font-semibold">Riwayat Permanen: Aktif</span>
+					{:else}
+						<DatabaseZap size={14} class="text-slate-500" />
+						<span class="text-xs font-semibold">Riwayat Permanen: Tidak Aktif</span>
+					{/if}
+				</div>
+				<p class="text-subtle text-[11px]">
+					{#if status.persistence.mode === 'durable'}
+						Kejadian disimpan ke basis data dan bertahan lintas restart. Retensi
+						{status.persistence.retentionDays} hari.
+					{:else}
+						Basis data tidak dikonfigurasi (<code>DATABASE_URL</code> kosong). Statistik dan pencarian
+						radius hanya mencakup data sejak proses ini berjalan. Aplikasi tetap berfungsi penuh.
+					{/if}
+				</p>
+			</div>
+			<div class="rounded-lg border border-[var(--border)] p-3">
+				<div class="mb-1 flex items-center gap-1.5">
+					<Zap size={14} class="text-sky-600 dark:text-sky-400" />
+					<span class="text-xs font-semibold"
+						>Cache Respons: {status.cache.entries.toLocaleString('id-ID')} entri</span
+					>
+				</div>
+				<p class="text-subtle text-[11px]">
+					Cache bersifat <strong>per-instans</strong> dan sementara. Ini <em>bukan</em> penyimpanan riwayat
+					— cache hanya mempercepat respons dan melindungi batas laju sumber data. Pada serverless, cache
+					hilang saat instans didaur ulang.
+				</p>
+			</div>
+		</div>
+		<p class="text-subtle mt-2 text-[11px]">
+			Cache dan riwayat permanen adalah dua hal berbeda. Memperbesar cache tidak menggantikan basis
+			data.
+		</p>
+	</div>
 
 	{#if status.liveProbe}
 		<div class="card p-3">
