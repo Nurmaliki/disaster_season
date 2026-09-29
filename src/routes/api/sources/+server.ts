@@ -45,6 +45,7 @@ const CATEGORY_BY_PROVIDER: Record<string, string[]> = {
 	'bmkg-weather': ['forecast'],
 	'bmkg-warning': ['early_warning'],
 	'pvmbg-volcano': ['hazard', 'current_event'],
+	'firms-wildfire': ['observation'],
 	'bnpb-disaster': ['current_event', 'historical'],
 	'inarisk-hazard': ['hazard', 'risk']
 };
@@ -56,6 +57,10 @@ const NOTES_BY_PROVIDER: Record<string, string> = {
 		'Peringatan dini cuaca berbasis CAP. Hanya peringatan yang masih berlaku yang ditampilkan secara default.',
 	'pvmbg-volcano':
 		'Tingkat aktivitas gunung api bersifat resmi. Koordinat dari tabel referensi; gunung tanpa koordinat tidak dipetakan.',
+	'firms-wildfire':
+		'Titik panas (hotspot) hasil deteksi anomali termal satelit VIIRS/MODIS — bukan kebakaran yang terkonfirmasi. ' +
+		'Bersifat opt-in: tanpa FIRMS_MAP_KEY sumber ini tidak aktif. NASA, bukan instansi Indonesia, karena BMKG tidak ' +
+		'menyediakan endpoint hotspot publik, SIPONGI (KLHK) tidak dapat dijangkau dari hosting umum, dan BNPB/InaRISK tidak tersedia.',
 	'bnpb-disaster':
 		'Endpoint publik BNPB/DIBI tidak selalu dapat dijangkau. Bila tidak tersedia, aplikasi menampilkan status tidak tersedia.',
 	'inarisk-hazard':

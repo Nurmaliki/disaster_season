@@ -121,17 +121,36 @@ static/
 
 ## Data sources
 
-| Source                                         | Domains                                           | Categories                                                 | Notes                                                                                             |
-| ---------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **BMKG** (`data.bmkg.go.id`, `api.bmkg.go.id`) | Earthquakes, weather forecast, CAP early warnings | `current_event`, `historical`, `forecast`, `early_warning` | Earthquakes are _occurred_ events. Weather API is `adm4`-only.                                    |
-| **PVMBG / MAGMA** (`magma.esdm.go.id`)         | Volcano activity levels I–IV                      | `hazard`, `current_event`                                  | Activity level is the official published status. Coordinates come from a bundled reference table. |
-| **BNPB / DIBI**                                | Disaster events                                   | `current_event`, `historical`                              | Public endpoint is not always reachable; the adapter probes and reports honestly.                 |
-| **InaRISK**                                    | Hazard maps                                       | `hazard`, `risk`                                           | Areal assessment, never merged with active warnings.                                              |
-| **BPS / BIG**                                  | Region codes & coordinates                        | reference                                                  | Bundled static table; never presented as hazard data.                                             |
-| **OpenStreetMap / CARTO**                      | Basemap                                           | —                                                          | Map tiles only.                                                                                   |
+| Source                                          | Domains                                           | Categories                                                 | Notes                                                                                                 |
+| ----------------------------------------------- | ------------------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **BMKG** (`data.bmkg.go.id`, `api.bmkg.go.id`)  | Earthquakes, weather forecast, CAP early warnings | `current_event`, `historical`, `forecast`, `early_warning` | Earthquakes are _occurred_ events. Weather API is `adm4`-only.                                        |
+| **PVMBG / MAGMA** (`magma.esdm.go.id`)          | Volcano activity levels I–IV                      | `hazard`, `current_event`                                  | Activity level is the official published status. Coordinates come from a bundled reference table.     |
+| **NASA FIRMS** (`firms.modaps.eosdis.nasa.gov`) | Fire hotspots (thermal anomalies)                 | `observation`                                              | **Opt-in**; needs a free `FIRMS_MAP_KEY`. A hotspot is a satellite _detection_, not a confirmed fire. |
+| **BNPB / DIBI**                                 | Disaster events                                   | `current_event`, `historical`                              | Public endpoint is not always reachable; the adapter probes and reports honestly.                     |
+| **InaRISK**                                     | Hazard maps                                       | `hazard`, `risk`                                           | Areal assessment, never merged with active warnings.                                                  |
+| **BPS / BIG**                                   | Region codes & coordinates                        | reference                                                  | Bundled static table; never presented as hazard data.                                                 |
+| **OpenStreetMap / CARTO**                       | Basemap                                           | —                                                          | Map tiles only.                                                                                       |
 
 If a source is unreachable, the app shows an **unavailable** state rather than a
 substitute. **No disaster data is ever fabricated.**
+
+### Wildfires (karhutla)
+
+Wildfire detection has no reachable **Indonesian** government feed today: BMKG
+publishes no hotspot endpoint, SIPONGI (KLHK) does not resolve from
+general-purpose hosting, and BNPB/InaRISK are unreachable. The only reachable
+source is **NASA FIRMS**, which is integrated as an **opt-in** provider:
+
+- Without `FIRMS_MAP_KEY` the provider is **dormant** — it reports `unconfigured`
+  on `/status` and yields zero events. It never invents a hotspot.
+- With a [free MAP_KEY](https://firms.modaps.eosdis.nasa.gov/api/map_key),
+  recent VIIRS/MODIS thermal anomalies over Indonesia appear on the map.
+- These events are category **`observation`**, never `current_event`. A thermal
+  anomaly is a satellite _detection_ — it can be a small burn, land clearing or a
+  false positive — so the label is always **"Titik Panas (Hotspot)"**, never
+  "kebakaran terkonfirmasi". Severity is our own confidence-based classification
+  (`severityIsInternal`). At most 300 most-recent detections are emitted per sync,
+  and truncation is disclosed in the event metadata.
 
 ## API endpoints
 
@@ -164,9 +183,21 @@ with the official endpoints as defaults. Only `PUBLIC_*` variables reach the
 browser, and no secret may ever be `PUBLIC_`. No API secrets are exposed to the
 frontend.
 
-### Optional persistence
+### Optional wildfire hotspots (NASA FIRMS)
 
-The app is **stateless by default** and runs with zero configuration. Setting
+Wildfire/karhutla support is **opt-in**. Without a key the provider stays dormant
+and `/status` reports it as `unconfigured`; no hotspot is ever fabricated.
+
+```bash
+# Free key: https://firms.modaps.eosdis.nasa.gov/api/map_key
+FIRMS_MAP_KEY=your_key_here
+# Optional tuning:
+FIRMS_SOURCE=VIIRS_SNPP_NRT   # VIIRS_SNPP_NRT | VIIRS_NOAA20_NRT | MODIS_NRT
+FIRMS_DAY_RANGE=1             # 1–5
+```
+
+### Optional persistenceThe app is **stateless by default** and runs with zero configuration. Setting
+
 `DATABASE_URL` opts into durable storage of normalized events, which is used to
 give `/api/statistics` real history beyond the current process's lifetime:
 
@@ -359,6 +390,12 @@ npx vitest run path/to/spec.ts # a single spec
   probe them and return zero events with an honest "unavailable" status. Their
   normalizers are complete, so real data flows in automatically if the endpoints
   become reachable (or if a mirror is configured).
+- **Wildfire (karhutla) has no reachable Indonesian government feed.** The only
+  reachable source is **NASA FIRMS**, which requires a free `FIRMS_MAP_KEY` and
+  is therefore **opt-in**: dormant and reported as `unconfigured` until a key is
+  set. Its data is a satellite thermal-anomaly _detection_ (category
+  `observation`), always labelled **"Titik Panas (Hotspot)"** — never a confirmed
+  fire. At most 300 most-recent detections are shown per sync.
 - **BMKG weather is `adm4`-only.** `adm1`/`adm2`/`adm3` return HTML from the
   public API, so provinces/regencies use the capital's `adm4` and say so.
 - **MAGMA is slow and its HTML table has no clean JSON API.** Parsing is wrapped

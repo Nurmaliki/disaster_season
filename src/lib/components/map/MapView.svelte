@@ -13,6 +13,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { env } from '$env/dynamic/public';
 	import { replaceState } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import type { Map as MaplibreMap, GeoJSONSource } from 'maplibre-gl';
 	import type { DisasterEvent } from '$lib/types';
 	import {
@@ -493,14 +494,17 @@
 	function persistView(): void {
 		if (!map || !syncUrl) return;
 		const center = map.getCenter();
-		const url = new URL(window.location.href);
-		url.searchParams.set('lat', center.lat.toFixed(3));
-		url.searchParams.set('lng', center.lng.toFixed(3));
-		url.searchParams.set('zoom', map.getZoom().toFixed(2));
-		// SvelteKit's replaceState keeps the router in sync (and does not pollute
-		// the back button on every pan), unlike calling history.replaceState
-		// directly, which the framework warns about.
-		replaceState(url, {});
+		// persistView only runs where syncUrl is enabled (the /map route), so the
+		// target is a known route rather than an arbitrary URL. resolve() keeps
+		// SvelteKit's router authoritative, and replaceState keeps it in sync
+		// without polluting the back button on every pan.
+		const params = new URLSearchParams({
+			lat: center.lat.toFixed(3),
+			lng: center.lng.toFixed(3),
+			zoom: map.getZoom().toFixed(2)
+		});
+		const target = resolve(`/map?${params.toString()}` as '/map');
+		replaceState(target, {});
 	}
 
 	/** Requested only on explicit user action. */

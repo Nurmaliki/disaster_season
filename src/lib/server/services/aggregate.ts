@@ -23,6 +23,8 @@ import { fetchVolcanoActivity } from '$lib/server/providers/pvmbg/volcano';
 import { normalizeVolcanoes } from '$lib/server/providers/pvmbg/volcano-normalizer';
 import { probeInarisk } from '$lib/server/providers/inarisk/layers';
 import { probeBnpb } from '$lib/server/providers/bnpb/disaster';
+import { fetchHotspots, firmsConfigured } from '$lib/server/providers/firms/wildfire';
+import { normalizeHotspots } from '$lib/server/providers/firms/wildfire-normalizer';
 import { persistEvents, readRecentEvents } from '$lib/server/db/repository';
 
 /* ------------------------------------------------------------------ */
@@ -225,12 +227,65 @@ export async function syncVolcanoes(): Promise<VolcanoPayload> {
 }
 
 /**
+ * Fetches satellite hotspot detections (NASA FIRMS) over Indonesia.
+ *
+ * Wildfire has no reachable Indonesian government feed (BMKG has no hotspot
+ * endpoint, SIPONGI does not resolve, BNPB/InaRISK are unreachable), so FIRMS is
+ * the only source. It is opt-in: without FIRMS_MAP_KEY the provider reports
+ * itself as unconfigured and yields zero detections rather than failing.
+ *
+ * Detections are `observation` category — a thermal anomaly, not a confirmed
+ * fire — and severity is our own confidence-based classification.
+ */
+export async function syncHotspots(): Promise<NormalizedProviderPayload> {
+	const provider = 'firms-wildfire';
+	const retrievedAt = new Date().toISOString();
+
+	if (!firmsConfigured()) {
+		// Not an error: the feature is simply not enabled on this deployment.
+		return {
+			provider,
+			events: [],
+			priority: 70,
+			retrievedAt,
+			cached: false,
+			stale: false,
+			error: undefined
+		};
+	}
+
+	try {
+		const result = await fetchHotspots();
+		const events = normalizeHotspots(result.hotspots, retrievedAt);
+
+		recordSuccess(provider, result.durationMs);
+		logger.info('sync hotspots ok', {
+			provider,
+			count: events.length,
+			durationMs: result.durationMs
+		});
+
+		return {
+			provider,
+			events,
+			priority: 70,
+			retrievedAt,
+			cached: false,
+			stale: false
+		};
+	} catch (error) {
+		recordFailure(provider, error);
+		logger.error('sync hotspots failed', { provider, error });
+		throw error;
+	}
+}
+
+/**
  * Probes BNPB and InaRISK reachability.
  *
  * Neither exposes a reachable public JSON API today, so this records real
  * availability for /status and returns zero events rather than inventing any.
- */
-export async function syncUnavailableSources(): Promise<{
+ */ export async function syncUnavailableSources(): Promise<{
 	bnpb: Awaited<ReturnType<typeof probeBnpb>>;
 	inarisk: Awaited<ReturnType<typeof probeInarisk>>;
 }> {
@@ -252,7 +307,8 @@ export async function syncUnavailableSources(): Promise<{
 const STALE = {
 	earthquake: config.staleTtl.earthquake,
 	warning: config.staleTtl.warning,
-	volcano: config.staleTtl.volcano
+	volcano: config.staleTtl.volcano,
+	wildfire: config.staleTtl.wildfire
 };
 
 /** Earthquakes, cached ~2 min with 1 h stale fallback. */
@@ -308,6 +364,26 @@ export async function getVolcanoes(
 	};
 }
 
+/**
+ * Satellite hotspot detections, cached ~30 min with 24 h stale fallback.
+ * Returns an empty list when FIRMS is not configured (never an error).
+ */
+export async function getHotspots(
+	options: { forceRefresh?: boolean } = {}
+): Promise<NormalizedProviderPayload> {
+	const result = await cached(cacheKey('firms', 'wildfire'), config.ttl.wildfire, syncHotspots, {
+		staleSeconds: STALE.wildfire,
+		forceRefresh: options.forceRefresh
+	});
+
+	return {
+		...result.data,
+		cached: result.cached,
+		stale: result.stale,
+		degraded: result.data.degraded || result.degraded || result.stale
+	};
+}
+
 /** Weather for a region, cached ~15 min with 2 h stale fallback. */
 export async function getWeather(
 	adm4: string,
@@ -360,11 +436,19 @@ export async function aggregateEvents(
 ): Promise<AggregateResult> {
 	const { includeVolcanoes = true, forceRefresh = false } = options;
 
+	// Provider ids are listed in the same order as `tasks` so a rejected promise
+	// can still be attributed to the right source.
+	const providerIds = ['bmkg-earthquake', 'bmkg-warning'];
 	const tasks: Array<Promise<NormalizedProviderPayload>> = [
 		getEarthquakes({ forceRefresh }),
 		getWarnings({ forceRefresh })
 	];
-	if (includeVolcanoes) tasks.push(getVolcanoes({ forceRefresh }));
+	if (includeVolcanoes) {
+		tasks.push(getVolcanoes({ forceRefresh }));
+		providerIds.push('pvmbg-volcano');
+	}
+	tasks.push(getHotspots({ forceRefresh }));
+	providerIds.push('firms-wildfire');
 
 	const settled = await Promise.allSettled(tasks);
 
@@ -375,12 +459,12 @@ export async function aggregateEvents(
 	const names: Record<string, string> = {
 		'bmkg-earthquake': 'BMKG — Gempa Bumi',
 		'bmkg-warning': 'BMKG — Peringatan Dini Cuaca',
-		'pvmbg-volcano': 'PVMBG / MAGMA — Gunung Api'
+		'pvmbg-volcano': 'PVMBG / MAGMA — Gunung Api',
+		'firms-wildfire': 'NASA FIRMS — Titik Panas (Hotspot)'
 	};
 
 	settled.forEach((outcome, index) => {
-		const providerId =
-			['bmkg-earthquake', 'bmkg-warning', 'pvmbg-volcano'][index] ?? `provider-${index}`;
+		const providerId = providerIds[index] ?? `provider-${index}`;
 
 		if (outcome.status === 'fulfilled') {
 			payloads.push(outcome.value);

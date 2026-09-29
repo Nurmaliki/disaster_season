@@ -42,6 +42,29 @@ export const config = {
 		inarisk: {
 			baseUrl: str(env.INARISK_BASE_URL, 'https://inarisk.bnpb.go.id'),
 			timeoutMs: num(env.INARISK_TIMEOUT_MS, 10_000)
+		},
+		/**
+		 * NASA FIRMS — satellite fire/thermal-anomaly detections ("hotspots").
+		 *
+		 * This is the only reachable source of wildfire information: BMKG publishes
+		 * no public hotspot endpoint, SIPONGI (KLHK) does not resolve from
+		 * general-purpose hosting, and BNPB/InaRISK are unreachable. FIRMS is an
+		 * official NASA service, but its area API requires a free MAP_KEY, so the
+		 * provider stays dormant (reported as `unconfigured`) until `FIRMS_MAP_KEY`
+		 * is set. It never fabricates a hotspot.
+		 */
+		firms: {
+			baseUrl: str(env.FIRMS_BASE_URL, 'https://firms.modaps.eosdis.nasa.gov'),
+			/**
+			 * Free API key. When empty, the provider is treated as unconfigured
+			 * rather than failing loudly — the feature is opt-in.
+			 */
+			mapKey: str(env.FIRMS_MAP_KEY, ''),
+			/** VIIRS Suomi-NPP near-real-time is the standard daily product. */
+			source: str(env.FIRMS_SOURCE, 'VIIRS_SNPP_NRT'),
+			/** Days of detections to request (FIRMS allows 1–5). */
+			dayRange: num(env.FIRMS_DAY_RANGE, 1),
+			timeoutMs: num(env.FIRMS_TIMEOUT_MS, 20_000)
 		}
 	},
 
@@ -54,6 +77,7 @@ export const config = {
 		earthquake: num(env.CACHE_TTL_EARTHQUAKE, 120), // 2 min
 		warning: num(env.CACHE_TTL_WARNING, 300), // 5 min
 		volcano: num(env.CACHE_TTL_VOLCANO, 1_800), // 30 min
+		wildfire: num(env.CACHE_TTL_WILDFIRE, 1_800), // 30 min (satellite overpass cadence)
 		disaster: num(env.CACHE_TTL_DISASTER, 900), // 15 min
 		season: num(env.CACHE_TTL_SEASON, 21_600), // 6 h
 		hazard: num(env.CACHE_TTL_HAZARD, 86_400), // 24 h
@@ -68,6 +92,7 @@ export const config = {
 		earthquake: num(env.STALE_TTL_EARTHQUAKE, 3_600),
 		warning: num(env.STALE_TTL_WARNING, 3_600),
 		volcano: num(env.STALE_TTL_VOLCANO, 86_400),
+		wildfire: num(env.STALE_TTL_WILDFIRE, 86_400),
 		disaster: num(env.STALE_TTL_DISASTER, 86_400),
 		season: num(env.STALE_TTL_SEASON, 604_800),
 		hazard: num(env.STALE_TTL_HAZARD, 604_800)

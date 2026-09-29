@@ -171,6 +171,13 @@ export const PROVIDER_DESCRIPTORS: ProviderDescriptor[] = [
 		domains: ['volcano']
 	},
 	{
+		id: 'firms-wildfire',
+		name: 'NASA FIRMS — Titik Panas (Hotspot)',
+		attribution: 'NASA FIRMS (Fire Information for Resource Management System)',
+		url: 'https://firms.modaps.eosdis.nasa.gov/',
+		domains: ['wildfire']
+	},
+	{
 		id: 'bnpb-disaster',
 		name: 'BNPB — Kejadian Bencana (DIBI)',
 		attribution: 'Badan Nasional Penanggulangan Bencana (BNPB)',

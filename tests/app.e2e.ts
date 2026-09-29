@@ -558,4 +558,19 @@ test.describe('storage mode transparency', () => {
 		await expect(panel.getByText(/Cache Respons:/)).toBeVisible();
 		await expect(panel.getByText(/per-instans/)).toBeVisible();
 	});
+
+	test('sources catalogue lists NASA FIRMS honestly as an observation source', async ({
+		request
+	}) => {
+		const response = await request.get('/api/sources');
+		expect(response.ok()).toBeTruthy();
+
+		const body = await response.json();
+		const firms = body.data.sources.find((s: { id: string }) => s.id === 'firms-wildfire');
+		expect(firms).toBeDefined();
+		// A hotspot is a satellite detection: it must be an observation category,
+		// never a current_event.
+		expect(firms.categories).toEqual(['observation']);
+		expect(firms.notes).toMatch(/bukan kebakaran yang terkonfirmasi/i);
+	});
 });
