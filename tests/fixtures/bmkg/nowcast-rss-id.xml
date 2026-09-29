@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <?xml-stylesheet type="text/xsl" href="/cap/nowcast-rss-style.xsl"?>
+    <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+        <channel>
+            <title>Peringatan Dini Cuaca BMKG</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/rss.xml</link>
+            <description>Peringatan Dini Cuaca dari BMKG (Badan Meteorologi, Klimatologi, dan Geofisika)</description>
+            <atom:link href="https://www.bmkg.go.id/alerts/nowcast/id/rss.xml" rel="self" type="application/rss+xml"/>
+            <language>id</language>
+            <copyright>public domain</copyright>
+            <pubDate>Tue, 29 Sep 2026 08:46:39 +0000</pubDate>
+            <lastBuildDate>Tue, 29 Sep 2026 08:46:39 +0000</lastBuildDate>
+            <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+            
+        <item>
+            <title>Hujan Lebat disertai Petir di Jawa Barat</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CJB20260929003_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 15:45 WIB di sebagian wilayah Jawa Barat, khususnya di BANDUNG KIDUL, BOJONG, BUAHBATU, CARINGIN, CIAMBAR, CICANTAYAN, CIKAKAK, CIKALONGKULON, CIKEMBAR, CIKIDANG, CIPANAS, CISAAT, CIWIDEY, CURUG KEMBAR, DAYEUHKOLOT, GUNUNG GURUH, JAMPANG TENGAH, KABANDUNGAN, KADUDAMPIT, KALAPANUNGGAL, LENGKONG, MANIIS, NAGRAK, NYALINDUNG, PABUARAN, PACET, PARONGPONG, PASIRJAMBU, PURABAYA, RANCABALI, SAGARANTEN, SINDANGKERTA, SUKARESMI, TEGALWARU, WANAYASA, WARUNG KIARA.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 18:00 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.32.003</guid>
+            <pubDate>Tue, 29 Sep 2026 15:30:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Gorontalo</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CGT20260929001_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 16:35 WITA di sebagian wilayah Gorontalo, khususnya di BUNTULIA.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 18:35 WITA.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.75.001</guid>
+            <pubDate>Tue, 29 Sep 2026 16:25:00 +0800</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Banten</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CBT20260929004_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 15:30 WIB di sebagian wilayah Banten, khususnya di BANJAR, CIKEDAL, CIKULUR, CILELES, CIMARGA, CIPEUCANG, CISATA, CURUG BITUNG, MANDALAWANGI, MEKARJAYA, MENES, PULOSARI, SAKETI, SOBANG.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 18:00 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.36.004</guid>
+            <pubDate>Tue, 29 Sep 2026 15:20:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Kalimantan Utara</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CKU20260929002_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 16:20 WITA di sebagian wilayah Kalimantan Utara, khususnya di SEKATAK.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 18:30 WITA.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.65.002</guid>
+            <pubDate>Tue, 29 Sep 2026 16:15:00 +0800</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Riau</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CRU20260929002_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 15:10 WIB di sebagian wilayah Riau, khususnya di BANDAR SEI KIJANG, BANGKINANG, BANGKINANG KOTA, BANGKO, BUKIT BATU, BUKIT KAPUR, DAYUN, GUNUNG SAHILAN, KAMPAR, KAMPAR KIRI TENGAH, KAMPAR TIMUR, KAMPAR UTARA, KERINCI KANAN, KOTO KAMPAR HULU, KUOK, LANGGAM, MANDAU, MANDAU, MEMPURA, PANGKALAN KERINCI, PANGKALAN KURAS, PEKAITAN, PELALAWAN, PINGGIR, PINGGIR, RIMBA MELINTANG, RUMBIO JAYA, SALO, SIAK HULU, SIAK KECIL, SINGINGI HILIR, SUNGAI APIT, SUNGAI MANDAU, SUNGAI SEMBILAN, TAMBANG, TAMPAN, TANAH PUTIH, TANAH PUTIH TANJUNG MELAWAN, TAPUNG, TAPUNG HILIR, TAPUNG HULU, TELUK MERANTI, XIII KOTO KAMPAR.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 18:00 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.14.002</guid>
+            <pubDate>Tue, 29 Sep 2026 15:00:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Jawa Tengah</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CJH20260929001_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 15:00 WIB di sebagian wilayah Jawa Tengah, khususnya di GRABAG, KALIANGKRIK, PRINGSURAT, SECANG, SELOPAMPANG, TEMANGGUNG, TEMBARAK, TLOGOMULYO, WINDUSARI.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 16:00 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.33.001</guid>
+            <pubDate>Tue, 29 Sep 2026 14:50:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Jakarta</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CJK20260929002_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 15:00 WIB di sebagian wilayah Jakarta, khususnya di CARIU, CIGUDEG, JASINGA, JONGGOL, PARUNG PANJANG, RUMPIN, SUKAMAKMUR, TANJUNGSARI, TENJO.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 18:00 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.31.002</guid>
+            <pubDate>Tue, 29 Sep 2026 14:50:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Papua Tengah</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CPT20260929001_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 16:55 WIT di sebagian wilayah Papua Tengah, khususnya di ALAMA, AMAR, IWAKA, KWAMKI NARAMA, MIMIKA BARAT, MIMIKA BARAT TENGAH, MIMIKA BARU, MIMIKA TIMUR, MIMIKA TIMUR JAUH.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 19:00 WIT.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.94.001</guid>
+            <pubDate>Tue, 29 Sep 2026 16:40:00 +0900</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Kalimantan Timur</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CKT20260929001_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 15:55 WITA di sebagian wilayah Kalimantan Timur, khususnya di BONGAN, KEMBANG JANGGUT, LOA KULU, LONG KALI, MUARA KAMAN, PENAJAM, SEPAKU, TENGGARONG SEBERANG.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 17:30 WITA.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.64.001</guid>
+            <pubDate>Tue, 29 Sep 2026 15:40:00 +0800</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Aceh</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CAH20260929003_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 14:45 WIB di sebagian wilayah Aceh, khususnya di BAITURRAHMAN, BAITUSSALAM, BANDA RAYA, DANAU PARIS, DARUL HIKMAH, GUNUNG MERIAH, INDRA JAYA, INDRAPURI, JAYA, JAYA BARU, KOTA BAHARU, KOTA COT GLIE, KOTA JANTHO, KRUENG BARONA JAYA, KRUENG SABEE, KUTA ALAM, KUTA RAJA, LEUPUNG, LHOKNGA, LHOONG, LONGKIB, LUENG BATA, MEURAXA, PANGA, PANTE CEUREUMEN, PANTON REU, PENANGGALAN, PEUKAN BADA, RUNDENG, SAMPOINIET, SETIA BHAKTI, SEUNAGAN, SEUNAGAN TIMUR, SIMEULUE TIMUR, SIMPANG KANAN, SIMPANG KIRI, SINGKOHOR, SULTAN DAULAT, SUNGAI MAS, SURO MAKMUR, SYIAH KUALA, TEUPAH TENGAH, TRUMON, ULEE KARENG.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 17:06 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.11.003</guid>
+            <pubDate>Tue, 29 Sep 2026 14:40:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Jawa Barat</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CJB20260929002_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 14:40 WIB di sebagian wilayah Jawa Barat, khususnya di ASTANA ANYAR, BABAKAN CIPARAY, BALEENDAH, BANDUNG KULON, BAROS, BOJONGLOA KIDUL, CAMPAKAMULYA, CANGKUANG, CARINGIN, CIAMBAR, CIBADAK, CIBEUREUM, CICANTAYAN, CIEMAS, CIKEMBAR, CIKOLE, CISAAT, CITAMIANG, CIWIDEY, DAYEUHKOLOT, GUNUNG GURUH, GUNUNG PUYUH, JAMPANG TENGAH, KADUDAMPIT, KATAPANG, KEBONPEDES, KUTAWARINGIN, LEMBURSITU, MARGAASIH, MARGAHAYU, NAGRAK, NYALINDUNG, PAGELARAN, PAMEUNGPEUK, PANGKALAN, PASIRJAMBU, PASIRKUDA, PELABUHANRATU, PURABAYA, RANCABALI, REGOL, SOREANG, SUKABUMI, SUKARAJA, TEGALWARU, WARUDOYONG, WARUNG KIARA.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 17:00 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.32.002</guid>
+            <pubDate>Tue, 29 Sep 2026 14:27:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Kalimantan Tengah</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CKG20260929001_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 14:30 WIB di sebagian wilayah Kalimantan Tengah, khususnya di KUMAI.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 16:00 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.62.001</guid>
+            <pubDate>Tue, 29 Sep 2026 14:20:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Sumatera Utara</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CSU20260929002_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 14:00 WIB di sebagian wilayah Sumatera Utara, khususnya di BATAHAN, BERAMPU, KERAJAAN, LAE PARIRA, MORO'O, O'O'U, PAGINDAR, PAKKAT, PARLILITAN, PERGETTENG GETTENG SENGKUT, SALAK, SIEMPAT NEMPU, SIEMPAT NEMPU HILIR, SIEMPAT NEMPU HULU, SILIMA PUNGGA PUNGGA, SITELU TALI URANG JEHE, TARABINTANG, TIGALINGGA, TINADA, TUGALA OYO.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 17:00 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.12.002</guid>
+            <pubDate>Tue, 29 Sep 2026 13:50:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Banten</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CBT20260929002_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 13:50 WIB di sebagian wilayah Banten, khususnya di CURUG BITUNG, JAWILAN, KOPO, MAJA, PAMARAYAN, RANGKASBITUNG.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 15:45 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.36.002</guid>
+            <pubDate>Tue, 29 Sep 2026 13:40:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Kep. Bangka Belitung</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CBB20260929001_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 13:35 WIB di sebagian wilayah Kep. Bangka Belitung, khususnya di PAYUNG.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 15:30 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.19.001</guid>
+            <pubDate>Tue, 29 Sep 2026 13:25:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Riau</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CRU20260929001_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 13:25 WIB di sebagian wilayah Riau, khususnya di BANGKO, BUKIT BATU, BUKIT BATU, BUKIT KAPUR, DUMAI SELATAN, DUMAI TIMUR, GAUNG, KAMPAR KIRI HILIR, KAMPAR KIRI TENGAH, LANGGAM, MEDANG KAMPAI, MERBAU, PENDALIAN IV KOTO, PERHENTIAN RAJA, SIAK HULU, SIAK KECIL, SUNGAI APIT, TAMBANG, TELUK MERANTI, XIII KOTO KAMPAR.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 16:00 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.14.001</guid>
+            <pubDate>Tue, 29 Sep 2026 13:15:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Jawa Timur</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CJT20260929001_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 13:30 WIB di sebagian wilayah Jawa Timur, khususnya di GEGER, KOKOP, KONANG.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 16:30 WIB.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.35.001</guid>
+            <pubDate>Tue, 29 Sep 2026 13:00:00 +0700</pubDate>
+        </item>
+
+        <item>
+            <title>Hujan Lebat disertai Petir di Sulawesi Tengah</title>
+            <link>https://www.bmkg.go.id/alerts/nowcast/id/CSG20260929001_alert.xml</link>
+            <description>Hujan lebat disertai petir akan terjadi pada 29 September 2026, 13:40 WITA di sebagian wilayah Sulawesi Tengah, khususnya di BANAWA SELATAN, BUNGKU TENGAH, KINOVARO, MARAWOLA BARAT, PALELEH, PINEMBANI.
+ Kondisi ini berpotensi menimbulkan dampak berupa jarak pandang berkurang, angin kencang, dan banjir lokal.
+ Masyarakat dihimbau untuk tetap waspada, mengurangi aktivitas di luar ruangan, serta mengambil langkah-langkah pencegahan yang diperlukan guna menjaga keselamatan.
+ Kondisi diperkirakan dapat berlangsung hingga 29 September 2026, 16:40 WITA.</description>
+            <author>cuaca.ekstrem@bmkg.go.id (BMKG)</author>
+            <category>Met</category>
+            <guid isPermaLink="false">2.49.0.1.360.0.2026.09.29.08.72.001</guid>
+            <pubDate>Tue, 29 Sep 2026 13:20:00 +0800</pubDate>
+        </item>
+        </channel>
+    </rss>
