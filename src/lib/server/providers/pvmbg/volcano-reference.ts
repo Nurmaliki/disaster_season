@@ -1,4 +1,4 @@
-import type { VolcanoReference }  from '$lib/server/providers/pvmbg/volcano.ts';
+import type { VolcanoReference }  from '$lib/server/providers/pvmbg/volcano';
 
 /**
  * Coordinate reference for Indonesian volcanoes monitored by PVMBG.

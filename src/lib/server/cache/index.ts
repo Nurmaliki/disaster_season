@@ -1,4 +1,4 @@
-import { logger }  from '$lib/server/logger.ts';
+import { logger }  from '$lib/server/logger';
 
 interface CacheEntry<T> {
 	value: T;

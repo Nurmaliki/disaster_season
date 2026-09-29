@@ -1,4 +1,4 @@
-import { logger }  from '$lib/server/logger.ts';
+import { logger }  from '$lib/server/logger';
 
 export class HttpError extends Error {
 	readonly status: number;

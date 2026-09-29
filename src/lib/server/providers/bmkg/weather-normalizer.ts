@@ -1,5 +1,5 @@
 import type { Severity } from '$lib/types';
-import type { BmkgWeatherPoint, BmkgWeatherResponse }  from '$lib/server/providers/bmkg/weather.ts';
+import type { BmkgWeatherPoint, BmkgWeatherResponse }  from '$lib/server/providers/bmkg/weather';
 
 const SOURCE_NAME = 'BMKG';
 const SOURCE_URL = 'https://www.bmkg.go.id/cuaca/prakiraan-cuaca.bmkg';

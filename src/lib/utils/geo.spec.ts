@@ -7,7 +7,7 @@ import {
 	geometryBounds,
 	geometryCenter,
 	isWithinIndonesia
-} from '$lib/utils/geo.ts';
+} from '$lib/utils/geo';
 
 describe('haversine distance', () => {
 	it('returns zero for identical points', () => {

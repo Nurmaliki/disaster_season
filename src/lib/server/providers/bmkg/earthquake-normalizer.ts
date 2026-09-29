@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { DisasterEvent, Severity } from '$lib/types';
-import type { BmkgRawQuake }  from '$lib/server/providers/bmkg/earthquake.ts';
-import { shakemapUrl }  from '$lib/server/providers/bmkg/earthquake.ts';
+import type { BmkgRawQuake }  from '$lib/server/providers/bmkg/earthquake';
+import { shakemapUrl }  from '$lib/server/providers/bmkg/earthquake';
 
 const SOURCE_NAME = 'BMKG';
 const SOURCE_URL = 'https://www.bmkg.go.id/gempabumi/gempabumi-terkini.bmkg';

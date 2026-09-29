@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { parseActivityTable, parseLevelCounts } from '$lib/server/providers/pvmbg/volcano.ts';
-import { lookupVolcanoReference } from '$lib/server/providers/pvmbg/volcano-reference.ts';
+import { parseActivityTable, parseLevelCounts } from '$lib/server/providers/pvmbg/volcano';
+import { lookupVolcanoReference } from '$lib/server/providers/pvmbg/volcano-reference';
 import { normalizeVolcanoes } from '$lib/server/providers/pvmbg/volcano-normalizer';
 
 const html = readFileSync('tests/fixtures/pvmbg/tingkat-aktivitas.html', 'utf-8');

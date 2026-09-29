@@ -1,5 +1,5 @@
-import type { Province } from './provinces.ts';
-import { PROVINCES } from './provinces.ts';
+import type { Province } from './provinces';
+import { PROVINCES } from './provinces';
 
 /**
  * Administrative region helpers.

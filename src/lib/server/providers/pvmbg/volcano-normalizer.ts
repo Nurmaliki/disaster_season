@@ -1,7 +1,7 @@
 import type { DisasterEvent, Severity } from '$lib/types';
-import type { VolcanoLevel, VolcanoRaw }  from '$lib/server/providers/pvmbg/volcano.ts';
-import { LEVEL_LABELS }  from '$lib/server/providers/pvmbg/volcano.ts';
-import { lookupVolcanoReference }  from '$lib/server/providers/pvmbg/volcano-reference.ts';
+import type { VolcanoLevel, VolcanoRaw }  from '$lib/server/providers/pvmbg/volcano';
+import { LEVEL_LABELS }  from '$lib/server/providers/pvmbg/volcano';
+import { lookupVolcanoReference }  from '$lib/server/providers/pvmbg/volcano-reference';
 
 const SOURCE_NAME = 'PVMBG / MAGMA Indonesia';
 const SOURCE_URL = 'https://magma.esdm.go.id/v1/gunung-api/tingkat-aktivitas';

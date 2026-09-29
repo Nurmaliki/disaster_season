@@ -1,4 +1,7 @@
-import type { DisasterEvent, NormalizedProviderPayload } from '$lib/server/services/types.ts';
+import type { DisasterEvent } from '$lib/types';
+import type { NormalizedProviderPayload } from '$lib/server/services/types';
+
+export type { NormalizedProviderPayload };
 
 /**
  * Deduplication and provenance merging.

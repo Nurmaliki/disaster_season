@@ -1,17 +1,17 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { parseXml, findAll, text, localName } from '$lib/server/xml.ts';
+import { parseXml, findAll, text, localName } from '$lib/server/xml';
 import {
 	parseCapRss,
 	parseCapAlert,
 	capPolygonsToMultiPolygon
-} from '$lib/server/providers/bmkg/warning.ts';
+} from '$lib/server/providers/bmkg/warning';
 import {
 	normalizeWarnings,
 	capSeverityToSeverity,
 	eventNameToDisasterType,
 	inferProvince
-} from '$lib/server/providers/bmkg/warning-normalizer.ts';
+} from '$lib/server/providers/bmkg/warning-normalizer';
 
 describe('XML reader', () => {
 	it('parses nested elements and text', () => {

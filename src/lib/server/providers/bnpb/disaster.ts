@@ -1,6 +1,6 @@
 import type { DisasterEvent, ProviderMeta } from '$lib/types';
-import { fetchJson } from '$lib/server/http.ts';
-import { config } from '$lib/server/config.ts';
+import { fetchJson } from '$lib/server/http';
+import { config } from '$lib/server/config';
 
 /**
  * BNPB — disaster event reporting (DIBI / Data Informasi Bencana Indonesia).

@@ -1,5 +1,5 @@
 import type { DisasterEvent, RiskAssessment, RiskFactor } from '$lib/types';
-import { eventTimestamp } from '$lib/server/services/merge.ts';
+import { eventTimestamp } from '$lib/server/services/merge';
 
 /**
  * Risk Engine — transparent and fully configurable.

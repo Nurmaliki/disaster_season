@@ -9,10 +9,10 @@ import {
 	formatDistance,
 	formatWind,
 	timezoneLabel
-} from '$lib/utils/format.ts';
-import { searchRegions } from '$lib/data/regencies.ts';
-import { isAdmCode, provinceCodeOf, regencyCodeOf, regenciesOfProvince, findRegencyByCode } from '$lib/data/regencies.ts';
-import { PROVINCES, findProvince } from '$lib/data/provinces.ts';
+} from '$lib/utils/format';
+import { searchRegions } from '$lib/data/regencies';
+import { isAdmCode, provinceCodeOf, regencyCodeOf, regenciesOfProvince, findRegencyByCode } from '$lib/data/regencies';
+import { PROVINCES, findProvince } from '$lib/data/provinces';
 
 describe('datetime formatting', () => {
 	it('formats in Indonesian with a WIB label', () => {

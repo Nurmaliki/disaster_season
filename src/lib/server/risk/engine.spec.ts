@@ -8,7 +8,7 @@ import {
 	eventRiskScore,
 	RISK_DISCLAIMER,
 	RISK_LEVEL_BANDS
-} from '$lib/server/risk/engine.ts';
+} from '$lib/server/risk/engine';
 
 /** Builds a valid event with sensible defaults so tests stay readable. */
 function makeEvent(overrides: Partial<DisasterEvent> = {}): DisasterEvent {

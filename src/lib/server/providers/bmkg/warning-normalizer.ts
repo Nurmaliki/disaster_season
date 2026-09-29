@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { DisasterEvent, Severity } from '$lib/types';
-import type { CapAlert } from '$lib/server/providers/bmkg/warning.ts';
-import { capPolygonsToMultiPolygon } from '$lib/server/providers/bmkg/warning.ts';
+import type { CapAlert } from '$lib/server/providers/bmkg/warning';
+import { capPolygonsToMultiPolygon } from '$lib/server/providers/bmkg/warning';
 
 const SOURCE_NAME = 'BMKG';
 const SOURCE_URL = 'https://www.bmkg.go.id/alerts/nowcast/id/rss.xml';

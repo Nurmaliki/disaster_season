@@ -16,9 +16,9 @@ export {
 	findRegencyByCode,
 	regenciesOfProvince,
 	REGENCIES
-} from '$lib/data/regencies.ts';
+} from '$lib/data/regencies';
 
-export type { RegionRef, RegencyEntry } from '$lib/data/regencies.ts';
+export type { RegionRef, RegencyEntry } from '$lib/data/regencies';
 
-export { PROVINCES, findProvince } from '$lib/data/provinces.ts';
-export type { Province } from '$lib/data/provinces.ts';
+export { PROVINCES, findProvince } from '$lib/data/provinces';
+export type { Province } from '$lib/data/provinces';

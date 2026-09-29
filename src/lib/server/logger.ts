@@ -1,4 +1,4 @@
-import { config }  from '$lib/server/config.ts';
+import { config }  from '$lib/server/config';
 
 type Level = 'debug' | 'info' | 'warn' | 'error';
 

@@ -1,7 +1,7 @@
 import type { DataProvider, DisasterEvent, ProviderMeta } from '$lib/types';
-import { fetchJson } from '$lib/server/http.ts';
-import { logger } from '$lib/server/logger.ts';
-import { config } from '$lib/server/config.ts';
+import { fetchJson } from '$lib/server/http';
+import { logger } from '$lib/server/logger';
+import { config } from '$lib/server/config';
 
 /**
  * BNPB / InaRISK hazard & risk layers.
@@ -211,7 +211,7 @@ export async function probeInarisk(): Promise<{
 	}
 }
 
-export const inariskProvider: DataProvider<InariskRawFeature[], DisasterEvent[]> = {
+export const inariskProvider: DataProvider<InariskRawFeature[], DisasterEvent> = {
 	meta: inariskMeta,
 	async fetch(signal) {
 		const started = Date.now();

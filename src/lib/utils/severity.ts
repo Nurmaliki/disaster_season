@@ -1,3 +1,4 @@
+import type { ExpressionSpecification } from 'maplibre-gl';
 import type { DataCategory, DisasterType, Severity } from '$lib/types';
 
 /**
@@ -185,9 +186,7 @@ export function disasterTypeToken(type: DisasterType | null | undefined): Disast
 }
 
 /** MapLibre paint expressions keyed by severity, used by the GeoJSON layers. */
-export function severityMatchExpression(
-	fallback = SEVERITY_TOKENS.unknown.hex
-): maplibregl.ExpressionSpecification {
+export function severityMatchExpression(fallback = SEVERITY_TOKENS.unknown.hex): ExpressionSpecification {
 	return [
 		'match',
 		['get', 'severity'],
@@ -200,5 +199,5 @@ export function severityMatchExpression(
 		'low',
 		SEVERITY_TOKENS.low.hex,
 		fallback
-	] as unknown as maplibregl.ExpressionSpecification;
+	] as unknown as ExpressionSpecification;
 }

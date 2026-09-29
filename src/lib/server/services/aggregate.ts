@@ -1,24 +1,24 @@
 import type { DisasterEvent } from '$lib/types';
-import { config } from '$lib/server/config.ts';
-import { cached, cacheKey } from '$lib/server/cache/index.ts';
-import { logger } from '$lib/server/logger.ts';
-import { recordFailure, recordSuccess } from '$lib/server/services/health.ts';
-import { mergeEvents, eventTimestamp, type NormalizedProviderPayload } from '$lib/server/services/merge.ts';
-import type { AggregateResult, EventQuery } from '$lib/server/services/types.ts';
+import { config } from '$lib/server/config';
+import { cached, cacheKey } from '$lib/server/cache/index';
+import { logger } from '$lib/server/logger';
+import { recordFailure, recordSuccess } from '$lib/server/services/health';
+import { mergeEvents, eventTimestamp, type NormalizedProviderPayload } from '$lib/server/services/merge';
+import type { AggregateResult, EventQuery } from '$lib/server/services/types';
 
 import {
 	fetchEarthquakeFeed,
 	type EarthquakeFeed
-} from '$lib/server/providers/bmkg/earthquake.ts';
-import { normalizeEarthquakes } from '$lib/server/providers/bmkg/earthquake-normalizer.ts';
-import { fetchCapRss, fetchCapAlerts } from '$lib/server/providers/bmkg/warning.ts';
-import { normalizeWarnings } from '$lib/server/providers/bmkg/warning-normalizer.ts';
-import { fetchWeather } from '$lib/server/providers/bmkg/weather.ts';
-import { normalizeWeather, type NormalizedWeather } from '$lib/server/providers/bmkg/weather-normalizer.ts';
-import { fetchVolcanoActivity } from '$lib/server/providers/pvmbg/volcano.ts';
-import { normalizeVolcanoes } from '$lib/server/providers/pvmbg/volcano-normalizer.ts';
-import { probeInarisk } from '$lib/server/providers/inarisk/layers.ts';
-import { probeBnpb } from '$lib/server/providers/bnpb/disaster.ts';
+} from '$lib/server/providers/bmkg/earthquake';
+import { normalizeEarthquakes } from '$lib/server/providers/bmkg/earthquake-normalizer';
+import { fetchCapRss, fetchCapAlerts } from '$lib/server/providers/bmkg/warning';
+import { normalizeWarnings } from '$lib/server/providers/bmkg/warning-normalizer';
+import { fetchWeather } from '$lib/server/providers/bmkg/weather';
+import { normalizeWeather, type NormalizedWeather } from '$lib/server/providers/bmkg/weather-normalizer';
+import { fetchVolcanoActivity } from '$lib/server/providers/pvmbg/volcano';
+import { normalizeVolcanoes } from '$lib/server/providers/pvmbg/volcano-normalizer';
+import { probeInarisk } from '$lib/server/providers/inarisk/layers';
+import { probeBnpb } from '$lib/server/providers/bnpb/disaster';
 
 /* ------------------------------------------------------------------ */
 /* Provider sync functions                                             */

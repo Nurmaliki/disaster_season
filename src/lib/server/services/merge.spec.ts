@@ -6,8 +6,8 @@ import {
 	compareEvents,
 	eventTimestamp,
 	eventStore
-} from '$lib/server/services/merge.ts';
-import type { NormalizedProviderPayload } from '$lib/server/services/types.ts';
+} from '$lib/server/services/merge';
+import type { NormalizedProviderPayload } from '$lib/server/services/types';
 
 function makeEvent(overrides: Partial<DisasterEvent> = {}): DisasterEvent {
 	return {

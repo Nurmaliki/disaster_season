@@ -1,6 +1,6 @@
-import { fetchJson }  from '$lib/server/http.ts';
-import { logger }  from '$lib/server/logger.ts';
-import { config }  from '$lib/server/config.ts';
+import { fetchJson }  from '$lib/server/http';
+import { logger }  from '$lib/server/logger';
+import { config }  from '$lib/server/config';
 
 /**
  * PVMBG / MAGMA Indonesia — volcanic activity levels.

@@ -8,7 +8,7 @@ import {
 	isTsunamiPotential,
 	earthquakeEventId,
 	normalizeEarthquakes
-} from '$lib/server/providers/bmkg/earthquake-normalizer.ts';
+} from '$lib/server/providers/bmkg/earthquake-normalizer';
 
 const autogempa = JSON.parse(readFileSync('tests/fixtures/bmkg/autogempa.json', 'utf-8'));
 const gempaterkini = JSON.parse(readFileSync('tests/fixtures/bmkg/gempaterkini.json', 'utf-8'));

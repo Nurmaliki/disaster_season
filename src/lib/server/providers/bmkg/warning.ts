@@ -1,6 +1,6 @@
-import { fetchJson } from '$lib/server/http.ts';
-import { logger } from '$lib/server/logger.ts';
-import { parseXml, findAll, find, text, localName, type XmlNode } from '$lib/server/xml.ts';
+import { fetchJson } from '$lib/server/http';
+import { logger } from '$lib/server/logger';
+import { parseXml, findAll, find, text, localName, type XmlNode } from '$lib/server/xml';
 
 /**
  * BMKG early weather warnings (CAP — Common Alerting Protocol).

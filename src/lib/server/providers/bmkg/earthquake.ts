@@ -1,5 +1,5 @@
-import { fetchJson, HttpError, type FetchOptions }  from '$lib/server/http.ts';
-import { logger }  from '$lib/server/logger.ts';
+import { fetchJson, HttpError, type FetchOptions }  from '$lib/server/http';
+import { logger }  from '$lib/server/logger';
 
 const BASE = 'https://data.bmkg.go.id/DataMKG/TEWS';
 
