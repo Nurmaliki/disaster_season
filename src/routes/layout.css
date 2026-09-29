@@ -190,6 +190,30 @@
 	outline-offset: -2px;
 }
 
+/*
+ * Map container sizing.
+ *
+ * MapLibre measures its container at construction. The container is an
+ * absolutely-positioned child that must resolve to a real, non-zero box even
+ * when its percentage-height parent is inside a flex column. Without this the
+ * container can measure 0-height, the canvas gets clipped by the wrapper's
+ * `overflow: hidden`, and the map appears blank even though it is rendering.
+ *
+ * `inset: 0` on the host plus `width/height: 100%` on the library's own
+ * elements guarantees a definite box in every layout.
+ */
+.map-canvas-host,
+.map-canvas-host .maplibregl-map,
+.map-canvas-host .maplibregl-canvas-container {
+	width: 100%;
+	height: 100%;
+}
+
+.map-canvas-host .maplibregl-canvas {
+	position: absolute;
+	inset: 0;
+}
+
 /* Thin, theme-aware scrollbars for panels. */
 .scroll-thin {
 	scrollbar-width: thin;

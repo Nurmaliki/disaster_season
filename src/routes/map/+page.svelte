@@ -78,14 +78,16 @@
 		</div>
 
 		<!-- Map + side list -->
-		<div class="mx-auto flex w-full max-w-[1600px] flex-1 flex-col lg:flex-row">
-			<div class="min-h-[60vh] flex-1 p-2 lg:min-h-0">
-				<MapView
-					events={filtered}
-					height="100%"
-					initialZoom={4.2}
-					onSelect={(event) => (selectedId = event?.id ?? null)}
-				/>
+		<div class="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col lg:flex-row">
+			<div class="flex p-2 lg:min-h-0 lg:flex-1 lg:flex-col">
+				<div class="h-[70vh] w-full lg:h-full">
+					<MapView
+						events={filtered}
+						height="100%"
+						initialZoom={4.2}
+						onSelect={(event) => (selectedId = event?.id ?? null)}
+					/>
+				</div>
 			</div>
 
 			<aside

@@ -12,6 +12,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import { env } from '$env/dynamic/public';
+	import { replaceState } from '$app/navigation';
 	import type { Map as MaplibreMap, GeoJSONSource } from 'maplibre-gl';
 	import type { DisasterEvent } from '$lib/types';
 	import {
@@ -67,6 +68,8 @@
 	let mapError = $state<string | null>(null);
 	/** Fires if the basemap has not loaded within the grace period. */
 	let loadWatchdog: number | null = null;
+	/** Keeps the map canvas sized to its container across layout changes. */
+	let resizeObserver: ResizeObserver | null = null;
 	let locating = $state(false);
 	let locationNotice = $state<string | null>(null);
 	let showLayers = $state(false);
@@ -196,6 +199,21 @@
 			if (syncUrl) {
 				map.on('moveend', persistView);
 			}
+
+			// Keep the map sized to its container.
+			//
+			// MapLibre measures its container once at construction. In flex
+			// layouts the container can legitimately be 0-height on first paint
+			// (the parent's size is only resolved after layout), which leaves the
+			// canvas clipped and the map invisible even though it is rendering.
+			// A ResizeObserver corrects this as soon as the real size is known and
+			// on every subsequent layout change (sidebar toggle, window resize).
+			if (container && typeof ResizeObserver !== 'undefined') {
+				resizeObserver = new ResizeObserver(() => {
+					map?.resize();
+				});
+				resizeObserver.observe(container);
+			}
 		} catch (error) {
 			console.error('[map] initialisation failed', error);
 			mapError = 'Peta tidak dapat dimuat pada perangkat ini.';
@@ -258,6 +276,12 @@
 			filter: ['has', 'point_count'] as never,
 			layout: {
 				'text-field': ['get', 'point_count_abbreviated'] as never,
+				// A symbol layer with no `icon-image` makes MapLibre request its
+				// built-in default icon ('circle-11'), which basemap sprites such as
+				// OpenFreeMap's do not contain — producing a console warning on every
+				// load. Binding to a property the features never carry yields a null
+				// icon, so nothing is requested.
+				'icon-image': ['get', '__no_icon'] as never,
 				// An explicit font stack is required: when omitted MapLibre falls
 				// back to its built-in default ("Open Sans Regular", "Arial Unicode
 				// MS Regular"), which most basemap glyph servers (including
@@ -293,6 +317,9 @@
 			filter: ['!', ['has', 'point_count']] as never,
 			layout: {
 				'text-field': ['get', 'typeLabel'] as never,
+				// See clusterCount above: a bound-but-absent icon-image avoids a
+				// request for MapLibre's built-in default sprite icon.
+				'icon-image': ['get', '__no_icon'] as never,
 				// See clusterCount above: an explicit, basemap-hosted font stack
 				// avoids 404 glyph lookups for MapLibre's built-in default fonts.
 				'text-font': ['Noto Sans Regular'] as never,
@@ -470,8 +497,10 @@
 		url.searchParams.set('lat', center.lat.toFixed(3));
 		url.searchParams.set('lng', center.lng.toFixed(3));
 		url.searchParams.set('zoom', map.getZoom().toFixed(2));
-		// replaceState avoids polluting the back button on every pan.
-		window.history.replaceState({}, '', url);
+		// SvelteKit's replaceState keeps the router in sync (and does not pollute
+		// the back button on every pan), unlike calling history.replaceState
+		// directly, which the framework warns about.
+		replaceState(url, {});
 	}
 
 	/** Requested only on explicit user action. */
@@ -546,6 +575,8 @@
 
 	onDestroy(() => {
 		if (loadWatchdog) clearTimeout(loadWatchdog);
+		resizeObserver?.disconnect();
+		resizeObserver = null;
 		map?.remove();
 		map = null;
 	});
@@ -555,11 +586,11 @@
 
 <div
 	class="relative overflow-hidden rounded-xl border border-[var(--border)]"
-	style="height:{height}"
+	style="height:{height}; min-height: 240px"
 >
 	<div
 		bind:this={container}
-		class="absolute inset-0"
+		class="map-canvas-host absolute inset-0"
 		aria-label="Peta interaktif bencana Indonesia"
 		role="application"
 	></div>

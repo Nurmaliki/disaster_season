@@ -369,6 +369,43 @@ test.describe('map page', () => {
 		await page.waitForTimeout(1500);
 		expect(workerErrors, `worker errors: ${workerErrors.join(' | ')}`).toEqual([]);
 	});
+
+	test('map canvas fills its container and is not covered', async ({ page }) => {
+		// Regression guard: the map container is an absolutely-positioned child
+		// whose height came from `height: 100%`. Inside a flex column that
+		// percentage can resolve to 0, so the canvas was clipped by the wrapper's
+		// `overflow: hidden` and the map looked blank even though MapLibre was
+		// rendering into it. Merely asserting the canvas exists (as above) does
+		// not catch that, so we assert real geometry and stacking.
+		await mockApi(page);
+		await page.goto('/map');
+		await expect(page.locator('.maplibregl-canvas')).toBeVisible({ timeout: 20000 });
+		await page.waitForTimeout(1500);
+
+		const measured = await page.evaluate(() => {
+			const canvas = document.querySelector('canvas.maplibregl-canvas');
+			const mapContainer = document.querySelector('.maplibregl-map');
+			if (!canvas || !mapContainer) return null;
+			const canvasRect = canvas.getBoundingClientRect();
+			const mapRect = mapContainer.getBoundingClientRect();
+			const topEl = document.elementFromPoint(
+				canvasRect.left + canvasRect.width / 2,
+				canvasRect.top + canvasRect.height / 2
+			);
+			return {
+				canvasHeight: canvasRect.height,
+				mapHeight: mapRect.height,
+				topTag: topEl?.tagName ?? null
+			};
+		});
+
+		expect(measured).not.toBeNull();
+		expect(measured!.mapHeight).toBeGreaterThan(200);
+		expect(measured!.canvasHeight).toBeGreaterThan(200);
+		// The canvas must be the topmost element at its own centre, otherwise
+		// something is painted over it and the map is effectively invisible.
+		expect(measured!.topTag).toBe('CANVAS');
+	});
 });
 
 test.describe('warnings page', () => {
