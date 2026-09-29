@@ -272,7 +272,9 @@ npx vitest run path/to/spec.ts # a single spec
   with a long timeout and always has a stale-cache fallback; if the page structure
   changes, the provider surfaces an error rather than an empty volcano layer.
 - **The Risk Score is an internal indicator**, not an official warning, and its
-  weights are a documented heuristic — the full breakdown is always shown.
+  weights are a documented heuristic — the full breakdown is always shown. On a
+  region page it is scoped to events tagged to that province **or** within 250 km
+  of the region centre, so a regency's score reflects what is actually near it.
 - **Rate limiting and the event store are per-instance** (in-process), so on
   serverless they are best-effort guardrails rather than global quotas. Durable
   history via `DATABASE_URL` is the remedy for the event store specifically.

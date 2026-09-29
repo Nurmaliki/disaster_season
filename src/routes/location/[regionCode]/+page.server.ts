@@ -8,7 +8,7 @@ import {
 } from '$lib/utils/regions';
 import { getWeather, aggregateEvents, queryEvents } from '$lib/server/services/aggregate';
 import { withinRadius } from '$lib/utils/geo';
-import { assessRisk } from '$lib/server/risk/engine';
+import { assessRisk, scopeEventsToArea } from '$lib/server/risk/engine';
 import { eventTimestamp } from '$lib/server/services/merge';
 import type { DisasterEvent } from '$lib/types';
 import type { NormalizedWeather } from '$lib/server/providers/bmkg/weather-normalizer';
@@ -102,9 +102,22 @@ export const load: PageServerLoad = async ({ params, setHeaders }) => {
 				.slice(0, 12);
 		}
 
-		const scoped = province
-			? queryEvents(aggregate.events, { provinces: [province.name] })
-			: aggregate.events;
+		// Scope risk the same way the map does: province label OR proximity.
+		// Using the shared scoper keeps this consistent with the nearby list
+		// above, and means a regency's score accounts for events near it even
+		// when they carry no province label. Falls back to the full set when we
+		// have no coordinate to scope against.
+		const scoped =
+			Number.isFinite(latitude) && Number.isFinite(longitude)
+				? scopeEventsToArea(aggregate.events, {
+						latitude: latitude as number,
+						longitude: longitude as number,
+						radiusKm: 250,
+						province: province?.name
+					})
+				: province
+					? queryEvents(aggregate.events, { provinces: [province.name] })
+					: [];
 		risk = assessRisk({ events: scoped.length ? scoped : aggregate.events });
 	} catch {
 		/* nearby/risk are best-effort */

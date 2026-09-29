@@ -6,6 +6,7 @@ import {
 	scoreToLevel,
 	seasonalFactor,
 	eventRiskScore,
+	scopeEventsToArea,
 	RISK_DISCLAIMER,
 	RISK_LEVEL_BANDS
 } from '$lib/server/risk/engine';
@@ -203,5 +204,66 @@ describe('event ranking score', () => {
 			expect(score).toBeGreaterThanOrEqual(0);
 			expect(score).toBeLessThanOrEqual(100);
 		}
+	});
+});
+
+describe('scopeEventsToArea', () => {
+	const JAKARTA = { latitude: -6.2, longitude: 106.8 };
+
+	it('includes an event whose province matches even when far away', () => {
+		// A CAP warning tagged to the province is relevant regardless of distance.
+		const warn = makeEvent({
+			id: 'w1',
+			category: 'early_warning',
+			location: { latitude: 4.5, longitude: 96.0, province: 'DKI Jakarta' }
+		});
+		const result = scopeEventsToArea([warn], { ...JAKARTA, radiusKm: 10, province: 'DKI Jakarta' });
+		expect(result.map((e) => e.id)).toEqual(['w1']);
+	});
+
+	it('includes a coordinate event inside the radius', () => {
+		const near = makeEvent({ id: 'near', location: { latitude: -6.21, longitude: 106.81 } });
+		const result = scopeEventsToArea([near], { ...JAKARTA, radiusKm: 25 });
+		expect(result.map((e) => e.id)).toEqual(['near']);
+	});
+
+	it('excludes a coordinate event outside the radius', () => {
+		const far = makeEvent({ id: 'far', location: { latitude: 1.5, longitude: 124.8 } });
+		const result = scopeEventsToArea([far], { ...JAKARTA, radiusKm: 25 });
+		expect(result).toEqual([]);
+	});
+
+	it('excludes the 0,0 placeholder used for volcanoes without coordinates', () => {
+		const placeholder = makeEvent({
+			id: 'volcano',
+			type: 'volcano',
+			location: { latitude: 0, longitude: 0 }
+		});
+		const result = scopeEventsToArea([placeholder], { ...JAKARTA, radiusKm: 1_000_000 });
+		expect(result).toEqual([]);
+	});
+
+	it('does not match on province when the scope has none', () => {
+		const tagged = makeEvent({
+			id: 'tagged',
+			location: { latitude: 4.5, longitude: 96.0, province: 'DKI Jakarta' }
+		});
+		const result = scopeEventsToArea([tagged], { ...JAKARTA, radiusKm: 10 });
+		expect(result).toEqual([]);
+	});
+
+	it('unions province matches and radius matches without duplicates', () => {
+		const byProvince = makeEvent({
+			id: 'p',
+			location: { latitude: 4.5, longitude: 96.0, province: 'DKI Jakarta' }
+		});
+		const byRadius = makeEvent({ id: 'r', location: { latitude: -6.21, longitude: 106.81 } });
+		const outside = makeEvent({ id: 'o', location: { latitude: 1.5, longitude: 124.8 } });
+		const result = scopeEventsToArea([byProvince, byRadius, outside], {
+			...JAKARTA,
+			radiusKm: 25,
+			province: 'DKI Jakarta'
+		});
+		expect(result.map((e) => e.id).sort()).toEqual(['p', 'r']);
 	});
 });

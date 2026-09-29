@@ -1,6 +1,7 @@
 import type { DisasterEvent, RiskAssessment, RiskFactor } from '$lib/types';
 import { eventTimestamp } from '$lib/server/services/merge';
 import { RISK_DISCLAIMER, RISK_LEVEL_BANDS } from '$lib/utils/risk';
+import { haversineKm } from '$lib/utils/geo';
 
 /**
  * Risk Engine — transparent and fully configurable.
@@ -224,17 +225,37 @@ export interface AreaScope {
 
 /**
  * Selects events relevant to an area.
- * Prefers province matching when the event carries a province (which is how
- * BMKG CAP alerts and PVMBG levels are tagged), falling back to radius.
+ *
+ * An event is relevant when EITHER:
+ *  - its `province` matches the scope's province (case-insensitively, either
+ *    direction — this is how BMKG CAP alerts and PVMBG levels are tagged), OR
+ *  - it has a known coordinate within `radiusKm` of the scope centre.
+ *
+ * Events with no province and no usable coordinate match neither test and are
+ * excluded: they cannot be attributed to the area. The `0,0` placeholder used
+ * for volcanoes without coordinates is treated as "no known coordinate" rather
+ * than as a point in the Gulf of Guinea (consistent with the rest of the app).
+ *
+ * Note this is a union (province OR radius), not an intersection: a CAP warning
+ * tagged to the province is relevant even if we cannot place it on the map.
  */
 export function scopeEventsToArea(events: DisasterEvent[], scope: AreaScope): DisasterEvent[] {
+	const wanted = scope.province?.toLowerCase();
+
 	return events.filter((event) => {
-		if (scope.province && event.location.province) {
-			const a = scope.province.toLowerCase();
-			const b = event.location.province.toLowerCase();
-			if (a === b || a.includes(b) || b.includes(a)) return true;
+		if (wanted && event.location.province) {
+			const tagged = event.location.province.toLowerCase();
+			if (tagged === wanted || tagged.includes(wanted) || wanted.includes(tagged)) {
+				return true;
+			}
 		}
-		return true;
+
+		const { latitude, longitude } = event.location;
+		if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return false;
+		// 0,0 is the "coordinate unknown" placeholder; never a real location.
+		if (latitude === 0 && longitude === 0) return false;
+
+		return haversineKm(scope.latitude, scope.longitude, latitude, longitude) <= scope.radiusKm;
 	});
 }
 
