@@ -4,7 +4,8 @@ import {
 	persistEvents,
 	readRecentEvents,
 	readEventById,
-	pruneOldEvents
+	pruneOldEvents,
+	findEventsNearby
 } from '$lib/server/db/repository';
 import type { DisasterEvent } from '$lib/types';
 
@@ -76,5 +77,9 @@ describe('repository (disabled)', () => {
 
 	it('pruneOldEvents is a no-op returning 0', async () => {
 		await expect(pruneOldEvents(90)).resolves.toBe(0);
+	});
+
+	it('findEventsNearby returns null so callers fall back to in-memory filtering', async () => {
+		await expect(findEventsNearby(-6.2, 106.8, 100)).resolves.toBeNull();
 	});
 });

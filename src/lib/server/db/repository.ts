@@ -131,6 +131,71 @@ export async function readRecentEvents(
 	}, null);
 }
 
+/** A persisted event plus its great-circle distance from the query point. */
+export interface NearbyEvent {
+	event: DisasterEvent;
+	distanceKm: number;
+}
+
+/**
+ * Radius search over persisted events using Postgres' `earthdistance`.
+ *
+ * The `earth_box(...) @> ...` predicate is index-assisted (it can use the GiST
+ * index from the migration), and the `earth_distance(...) <= ...` clause then
+ * rejects the false positives the bounding box admits. Both use real spherical
+ * geometry — there is no planar approximation or invented distance.
+ *
+ * Returns `null` when persistence is disabled OR when the `cube`/`earthdistance`
+ * extensions are not installed (`undefined_function`, SQLSTATE 42883), so the
+ * caller can fall back to in-memory filtering rather than report zero results.
+ */
+export async function findEventsNearby(
+	latitude: number,
+	longitude: number,
+	radiusKm: number,
+	options: { sinceMs?: number; limit?: number } = {}
+): Promise<NearbyEvent[] | null> {
+	const database = getDatabase();
+	if (!database) return null;
+
+	const radiusMeters = radiusKm * 1000;
+	const conditions = [
+		// Only rows with real coordinates participate. Placeholder (0,0) rows are
+		// excluded so they are never reported as "nearby".
+		sql`${disasterEvents.latitude} is not null and ${disasterEvents.longitude} is not null`,
+		sql`not (${disasterEvents.latitude} = 0 and ${disasterEvents.longitude} = 0)`,
+		sql`earth_box(ll_to_earth(${latitude}, ${longitude}), ${radiusMeters}) @> ll_to_earth(${disasterEvents.latitude}, ${disasterEvents.longitude})`,
+		sql`earth_distance(ll_to_earth(${latitude}, ${longitude}), ll_to_earth(${disasterEvents.latitude}, ${disasterEvents.longitude})) <= ${radiusMeters}`
+	];
+
+	if (options.sinceMs !== undefined) {
+		const cutoffIso = new Date(Date.now() - options.sinceMs).toISOString();
+		conditions.push(sql`${EVENT_TIME_EXPR} >= ${cutoffIso}::timestamptz`);
+	}
+
+	const distanceExpr = sql<number>`earth_distance(ll_to_earth(${latitude}, ${longitude}), ll_to_earth(${disasterEvents.latitude}, ${disasterEvents.longitude}))`;
+
+	const rows = await safely(async () => {
+		return database
+			.select({
+				payload: disasterEvents.payload,
+				distanceMeters: sql<number>`${distanceExpr}`
+			})
+			.from(disasterEvents)
+			.where(and(...conditions))
+			.orderBy(asc(distanceExpr))
+			.limit(options.limit ?? 200);
+	}, null);
+
+	// `safely` returned null: persistence failed (or extensions are missing).
+	if (rows === null) return null;
+
+	return rows.map((row) => ({
+		event: row.payload,
+		distanceKm: Math.round((Number(row.distanceMeters) / 1000) * 10) / 10
+	}));
+}
+
 /** Fetches a single persisted event by id, or `null` when absent/disabled. */
 export async function readEventById(id: string): Promise<DisasterEvent | null> {
 	const database = getDatabase();

@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import {
 	index,
 	integer,
@@ -24,6 +25,10 @@ import type { DisasterEvent } from '$lib/types';
  *   on `id` is idempotent across repeated syncs.
  * - `first_seen_at` is preserved across upserts; `updated_at` reflects the
  *   latest sync. This lets us tell "new event" from "re-observed event".
+ * - A `earth` expression index (see the migration) accelerates radius search
+ *   via the `earthdistance` extension when it is installed. Spatial search is
+ *   fully optional: without the extension the app falls back to in-memory
+ *   distance filtering.
  */
 export const disasterEvents = pgTable(
 	'disaster_events',
@@ -64,7 +69,16 @@ export const disasterEvents = pgTable(
 		index('disaster_events_province_idx').on(table.province),
 		index('disaster_events_source_name_idx').on(table.sourceName),
 		index('disaster_events_updated_at_idx').on(table.updatedAt),
-		uniqueIndex('disaster_events_source_identity_idx').on(table.sourceName, table.sourceId)
+		// One row per (provider, upstream id): re-syncing the same record updates
+		// in place rather than accumulating duplicates.
+		uniqueIndex('disaster_events_source_identity_idx').on(table.sourceName, table.sourceId),
+		// Spatial index for radius search. Requires the `cube` + `earthdistance`
+		// extensions, which the migration enables. Created with raw SQL because
+		// Drizzle has no first-class support for GiST expression indexes.
+		index('disaster_events_earth_idx').using(
+			'gist',
+			sql`ll_to_earth(${table.latitude}, ${table.longitude})`
+		)
 	]
 );
 

@@ -176,14 +176,24 @@ through a `safely()` wrapper that degrades to the in-memory path on any error.
 `GET /api/status` reports the active mode under `persistence.mode`
 (`stateless` | `durable`).
 
+### Spatial search
+
+When a database is configured, `GET /api/nearby` performs the radius search in
+SQL using PostgreSQL's built-in **`cube` + `earthdistance`** extensions (enabled
+by the committed migration), with a GiST index for the bounding-box prefilter.
+This is real great-circle geometry — no planar approximation, and **no PostGIS
+dependency**. The query combines durable history with live events, and reports
+`searchedHistory` so callers know which path produced the result. Without a
+database (or without the extensions) it falls back to in-memory distance
+filtering over the live aggregate and reports `searchedHistory: false`.
+
 ```sh
 createdb disaster_monitor
 DATABASE_URL=postgres://user@localhost:5432/disaster_monitor npm run db:push
 ```
 
 The schema lives in `src/lib/server/db/schema.ts`; generated SQL migrations are
-committed under `drizzle/`. PostGIS is **not required** (the app stores points,
-not geometry) — it can be added later for spatial queries.
+committed under `drizzle/`.
 
 ## Commands
 
@@ -240,15 +250,17 @@ npx vitest run path/to/spec.ts # a single spec
   serverless they are best-effort guardrails rather than global quotas. Durable
   history via `DATABASE_URL` is the remedy for the event store specifically.
 - **Persistence is optional and off by default.** Without `DATABASE_URL`,
-  statistics reflect only what the current process has seen. No DB is required
-  for any feature; PostGIS is neither used nor required.
+  statistics and `/api/nearby` reflect only what the current process has seen.
+  No DB is required for any feature. Spatial search uses `cube`/`earthdistance`
+  rather than PostGIS to avoid a heavyweight dependency.
 - **Seasonal context is national and coarse** (calendar-month based), not a
   region-level seasonal forecast.
 
 ## Next development
 
 - Ingest BMKG "Prakiraan Awal Musim" per zone for region-level seasonal outlooks.
-- Add PostGIS geometry columns for spatial queries (radius/bbox at the DB level).
+- Add PostGIS geometry columns for advanced spatial operations (polygon
+  containment, intersects) beyond the point-radius search already supported.
 - Push notifications for new warnings in a saved region (opt-in, privacy-first).
 - Saved locations / favourites with a local-only footprint.
 - Additional hazard layers (InaRISK) once a reachable endpoint is available.
