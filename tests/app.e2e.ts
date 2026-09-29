@@ -341,6 +341,34 @@ test.describe('map page', () => {
 		await page.goto('/map');
 		await expect(page.getByRole('button', { name: /Lapisan/i })).toBeVisible();
 	});
+
+	test('loads the MapLibre worker without error', async ({ page }) => {
+		// Regression guard: MapLibre v6 resolves its worker from a URL relative to
+		// its own bundle, which a bundler never emits. That left the map blank
+		// with only a console warning, while the canvas still existed — so a test
+		// that merely checks for a canvas would miss it. We assert the worker file
+		// is actually fetched and that no worker error is logged.
+		const workerRequests: string[] = [];
+		const workerErrors: string[] = [];
+		page.on('request', (r) => {
+			if (r.url().includes('/maplibre/worker.mjs')) workerRequests.push(r.url());
+		});
+		page.on('console', (m) => {
+			if (/worker/i.test(m.text()) && (m.type() === 'error' || m.type() === 'warning')) {
+				workerErrors.push(m.text());
+			}
+		});
+
+		await mockApi(page);
+		await page.goto('/map');
+		await expect(page.locator('.maplibregl-canvas')).toBeVisible({ timeout: 20000 });
+
+		// The worker is requested and the map container receives its controls, i.e.
+		// the map initialised rather than failing partway through.
+		await expect.poll(() => workerRequests.length, { timeout: 15000 }).toBeGreaterThan(0);
+		await page.waitForTimeout(1500);
+		expect(workerErrors, `worker errors: ${workerErrors.join(' | ')}`).toEqual([]);
+	});
 });
 
 test.describe('warnings page', () => {

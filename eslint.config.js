@@ -10,6 +10,10 @@ const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
+	// Vendored MapLibre worker runtime. Copied verbatim from node_modules by
+	// `scripts/sync-maplibre-worker.mjs`; it is third-party minified code and must
+	// not be linted or reformatted.
+	{ ignores: ['static/maplibre/**'] },
 	js.configs.recommended,
 	ts.configs.recommended,
 	svelte.configs.recommended,

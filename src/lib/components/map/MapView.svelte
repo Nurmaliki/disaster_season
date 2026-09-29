@@ -101,6 +101,14 @@
 			const maplibre = await import('maplibre-gl');
 			await import('maplibre-gl/dist/maplibre-gl.css');
 
+			// MapLibre v6 resolves its web worker from a URL relative to its own
+			// bundle. Under a bundler that URL points at a chunk which is never
+			// emitted, so the worker fails to load and the map stays blank. We
+			// serve a copy of the worker from `static/maplibre/` (kept in sync by
+			// `npm run sync:maplibre`) and point MapLibre at it explicitly. This
+			// must happen before the Map is constructed.
+			maplibre.setWorkerUrl('/maplibre/worker.mjs');
+
 			const url = new URL(window.location.href);
 			const centerParam = [
 				Number(url.searchParams.get('lng')),

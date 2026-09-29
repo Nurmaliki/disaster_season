@@ -4,6 +4,14 @@ import adapter from '@sveltejs/adapter-vercel';
 import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig({
+	optimizeDeps: {
+		// MapLibre resolves its web worker relative to its own bundle. Letting Vite
+		// pre-bundle the library breaks that resolution (it asks for a worker file
+		// in the deps cache that is never written). We serve the worker from
+		// `static/maplibre/` and point MapLibre at it via `setWorkerUrl()`.
+		exclude: ['maplibre-gl']
+	},
+
 	plugins: [
 		tailwindcss(),
 		sveltekit({
