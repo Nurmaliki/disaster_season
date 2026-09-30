@@ -1,17 +1,26 @@
 /**
  * Central server-side configuration.
  *
- * Reads from `process.env`. SvelteKit's `$env/dynamic/private` is intentionally
- * NOT imported directly so this module stays usable from plain Node contexts
- * (unit tests, sync scripts, cron handlers) without a kit runtime.
+ * Reads from SvelteKit's `$env/dynamic/private`, which is populated from `.env`
+ * in development and from the platform environment (e.g. Vercel) in production.
+ * `process.env` alone is NOT sufficient: Vite/SvelteKit do not copy `.env`
+ * values into `process.env`, so reading it directly would silently ignore every
+ * `.env` override (the values would always fall back to the defaults below).
  *
- * In a SvelteKit server context `process.env` is populated from the platform
- * environment, so behaviour is identical. Vite does not inline these values
- * because they are read at request time, never at build time.
+ * `process.env` is still consulted as a fallback so the module stays usable
+ * from plain Node contexts (unit tests, sync scripts, cron handlers) where the
+ * kit runtime — and therefore `$env` — is unavailable.
  */
+import { env as privateEnv } from '$env/dynamic/private';
+
 type EnvSource = Record<string, string | undefined>;
 
-const env: EnvSource = typeof process !== 'undefined' && process.env ? process.env : {};
+const env: EnvSource =
+	Object.keys(privateEnv ?? {}).length > 0
+		? (privateEnv as EnvSource)
+		: typeof process !== 'undefined' && process.env
+			? process.env
+			: {};
 
 function num(value: string | undefined, fallback: number): number {
 	const parsed = Number(value);
