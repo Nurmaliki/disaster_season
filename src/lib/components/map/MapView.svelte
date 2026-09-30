@@ -317,7 +317,7 @@
 			source: MAP_IDS.clusterSource,
 			filter: ['!', ['has', 'point_count']] as never,
 			layout: {
-				'text-field': ['get', 'typeLabel'] as never,
+				'text-field': ['get', 'label'] as never,
 				// See clusterCount above: a bound-but-absent icon-image avoids a
 				// request for MapLibre's built-in default sprite icon.
 				'icon-image': ['get', '__no_icon'] as never,

@@ -18,6 +18,12 @@ export interface EventFeatureProperties {
 	id: string;
 	type: string;
 	typeLabel: string;
+	/**
+	 * Short label rendered next to the marker. Uses the specific name where the
+	 * event has one (e.g. "Gunung Merapi") rather than the generic type label,
+	 * so volcanoes are not all labelled "Gunung Api".
+	 */
+	label: string;
 	category: string;
 	severity: string;
 	title: string;
@@ -87,10 +93,17 @@ function toProperties(event: DisasterEvent): EventFeatureProperties {
 		if (level) facts.push(`Level ${level}`);
 	}
 
+	// Prefer the specific entity name (volcano) over the generic type label so
+	// the map does not label every volcano with the same "Gunung Api" text.
+	const specificName =
+		event.type === 'volcano' ? String(event.metadata?.volcanoName ?? '').trim() : '';
+	const label = specificName ? `Gunung ${specificName}` : typeToken.label;
+
 	return {
 		id: event.id,
 		type: event.type,
 		typeLabel: typeToken.label,
+		label,
 		category: event.category,
 		severity: event.severity,
 		title: event.title,
