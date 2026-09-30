@@ -92,12 +92,26 @@ function toProperties(event: DisasterEvent): EventFeatureProperties {
 		const level = event.metadata?.level;
 		if (level) facts.push(`Level ${level}`);
 	}
+	if (event.type === 'wildfire') {
+		const confidence = event.metadata?.confidence;
+		if (confidence) facts.push(`kepercayaan ${confidence}`);
+		const satellite = event.metadata?.satellite;
+		if (satellite) facts.push(`satelit ${satellite}`);
+		const frp = event.metadata?.frpMw;
+		if (typeof frp === 'number' && Number.isFinite(frp)) facts.push(`FRP ${frp} MW`);
+	}
 
 	// Prefer the specific entity name (volcano) over the generic type label so
 	// the map does not label every volcano with the same "Gunung Api" text.
+	// Wildfire points are individual satellite hotspots, so label them "Hotspot".
 	const specificName =
 		event.type === 'volcano' ? String(event.metadata?.volcanoName ?? '').trim() : '';
-	const label = specificName ? `Gunung ${specificName}` : typeToken.label;
+	const label =
+		event.type === 'wildfire'
+			? 'Hotspot'
+			: specificName
+				? `Gunung ${specificName}`
+				: typeToken.label;
 
 	return {
 		id: event.id,
@@ -142,6 +156,31 @@ export function severityColorExpression(): unknown {
 	}
 	expression.push(SEVERITY_TOKENS.unknown.hex);
 	return expression;
+}
+
+/**
+ * Circle colour for a cluster, driven by the worst severity it contains.
+ *
+ * The cluster source aggregates `maxSeverityRank` (see MapView's
+ * `severityRank()`), so a cluster of critical events is never shown as the
+ * generic blue — the danger is visible while zoomed out, before the cluster
+ * expands into individual points.
+ */
+export function clusterSeverityColorExpression(): unknown {
+	return [
+		'step',
+		['get', 'maxSeverityRank'],
+		// rank < 2 (missing/unknown) -> neutral slate
+		'#64748b',
+		2,
+		SEVERITY_TOKENS.low.hex,
+		3,
+		SEVERITY_TOKENS.moderate.hex,
+		4,
+		SEVERITY_TOKENS.high.hex,
+		5,
+		SEVERITY_TOKENS.critical.hex
+	];
 }
 
 /**

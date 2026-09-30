@@ -134,7 +134,13 @@
 
 		{#if mapped.length > 0}
 			<div class="overflow-hidden rounded-xl border border-[var(--border)]">
-				<MapView events={mapped} height="360px" syncUrl={false} />
+				<MapView
+					events={mapped}
+					height="360px"
+					syncUrl={false}
+					clusterMaxZoom={7}
+					initialZoom={4.5}
+				/>
 			</div>
 		{/if}
 

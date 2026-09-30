@@ -23,7 +23,8 @@
 		INDONESIA_ZOOM,
 		AREA_PAINT,
 		severityColorExpression,
-		severityRadiusExpression
+		severityRadiusExpression,
+		clusterSeverityColorExpression
 	} from '$lib/map/layers';
 	import { SEVERITY_TOKENS } from '$lib/utils/severity';
 	import { formatDateTime } from '$lib/utils/format';
@@ -51,6 +52,12 @@
 		showControls?: boolean;
 		initialCenter?: [number, number];
 		initialZoom?: number;
+		/**
+		 * Zoom at/above which points stop clustering and render individually.
+		 * Lower it (e.g. for a single-hazard view) to reveal individual
+		 * positions sooner instead of one big cluster.
+		 */
+		clusterMaxZoom?: number;
 	}
 
 	let {
@@ -60,7 +67,8 @@
 		syncUrl = true,
 		showControls = true,
 		initialCenter = INDONESIA_CENTER,
-		initialZoom = INDONESIA_ZOOM
+		initialZoom = INDONESIA_ZOOM,
+		clusterMaxZoom = 11
 	}: Props = $props();
 
 	let container: HTMLDivElement | undefined = $state();
@@ -232,7 +240,7 @@
 			data: empty,
 			cluster: true,
 			clusterRadius: 48,
-			clusterMaxZoom: 11,
+			clusterMaxZoom,
 			// Aggregate the worst severity into each cluster so a cluster of
 			// critical events is never shown as green.
 			clusterProperties: {
@@ -263,7 +271,7 @@
 			source: MAP_IDS.clusterSource,
 			filter: ['has', 'point_count'] as never,
 			paint: {
-				'circle-color': '#1d4ed8',
+				'circle-color': clusterSeverityColorExpression() as never,
 				'circle-opacity': 0.85,
 				'circle-radius': ['step', ['get', 'point_count'], 16, 10, 20, 50, 26, 200, 34] as never,
 				'circle-stroke-width': 2,
@@ -335,7 +343,9 @@
 				'text-halo-color': '#ffffff',
 				'text-halo-width': 1.2
 			},
-			minzoom: 7
+			// Labels appear as soon as individual points separate from a cluster,
+			// so the distribution is legible before zooming all the way in.
+			minzoom: 5
 		});
 
 		// --- Interactions ---
