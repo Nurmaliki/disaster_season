@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { DisasterEvent, Severity } from '$lib/types';
 import type { FirmsHotspot } from '$lib/server/providers/firms/wildfire';
+import { nearestRegion } from '$lib/utils/regions';
 
 const SOURCE_NAME = 'NASA FIRMS';
 const SOURCE_URL = 'https://firms.modaps.eosdis.nasa.gov/';
@@ -117,10 +118,20 @@ export function normalizeHotspots(hotspots: FirmsHotspot[], retrievedAt: string)
 		const occurredAt = hotspotTimestamp(hotspot.acqDate, hotspot.acqTime);
 		const severity = confidenceSeverity(hotspot.confidence);
 
+		// Best-effort administrative label: the nearest bundled regency. This is
+		// a reference point, not a claim that the detection falls inside that
+		// boundary — the title/description make the hotspot nature explicit.
+		const region = nearestRegion(hotspot.latitude, hotspot.longitude);
+		const areaName = region ? region.regency.name : null;
+
 		const coords = `${hotspot.latitude.toFixed(3)}, ${hotspot.longitude.toFixed(3)}`;
-		const title = `Titik Panas (Hotspot) — ${coords}`;
+		const title = areaName
+			? `Titik Panas (Hotspot) — ${areaName}`
+			: `Titik Panas (Hotspot) — ${coords}`;
 
 		const parts: string[] = ['Deteksi anomali termal satelit. Bukan kebakaran yang terkonfirmasi.'];
+		if (areaName) parts.push(`Area terdekat: ${areaName}, ${region!.province.name}`);
+		else parts.push(`Koordinat ${coords}`);
 		if (hotspot.satellite) parts.push(`Satelit ${hotspot.satellite}`);
 		if (hotspot.instrument) parts.push(`instrumen ${hotspot.instrument}`);
 		if (hotspot.confidence) parts.push(`kepercayaan deteksi ${hotspot.confidence}`);
@@ -139,7 +150,11 @@ export function normalizeHotspots(hotspots: FirmsHotspot[], retrievedAt: string)
 			severityIsInternal: true,
 			location: {
 				latitude: hotspot.latitude,
-				longitude: hotspot.longitude
+				longitude: hotspot.longitude,
+				regency: region?.regency.name,
+				regencyCode: region?.regency.code,
+				province: region?.province.name,
+				provinceCode: region?.province.code
 			},
 			geometry: {
 				type: 'Point',
@@ -156,6 +171,7 @@ export function normalizeHotspots(hotspots: FirmsHotspot[], retrievedAt: string)
 			},
 			metadata: {
 				kind: 'thermal_anomaly',
+				areaName,
 				satellite: hotspot.satellite,
 				instrument: hotspot.instrument,
 				confidence: hotspot.confidence,

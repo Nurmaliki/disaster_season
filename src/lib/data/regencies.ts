@@ -764,3 +764,49 @@ export function regenciesOfProvince(provinceCode: string): RegencyEntry[] {
 	const prefix = `${provinceCode}.`;
 	return REGENCIES.filter((r) => r.code.startsWith(prefix));
 }
+
+/**
+ * Nearest bundled region to a coordinate, resolved by great-circle distance.
+ *
+ * Returns the closest regency (with its province) when one is within an
+ * Indonesian-plausible range. This is a best-effort *label*: hotspot
+ * coordinates from FIRMS are not administrative and we never claim the fire is
+ * inside a specific boundary — only that this regency is the closest known
+ * reference point. Returns null when nothing is close (e.g. a point far
+ * offshore), so callers can fall back to "perairan"/"unknown" instead of
+ * inventing a place name.
+ */
+export function nearestRegion(
+	latitude: number,
+	longitude: number
+): { regency: RegencyEntry; province: Province; distanceKm: number } | null {
+	let best: { regency: RegencyEntry; distanceKm: number } | null = null;
+
+	for (const regency of REGENCIES) {
+		const distanceKm = haversineKm(latitude, longitude, regency.latitude, regency.longitude);
+		if (!best || distanceKm < best.distanceKm) {
+			best = { regency, distanceKm };
+		}
+	}
+
+	// ~250 km is generous enough to label remote detections while still
+	// avoiding attaching an obviously wrong, far-away regency name.
+	if (!best || best.distanceKm > 250) return null;
+
+	const province = findProvinceByCode(best.regency.code);
+	if (!province) return null;
+
+	return { regency: best.regency, province, distanceKm: best.distanceKm };
+}
+
+/** Great-circle distance in kilometres between two coordinates. */
+export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+	const R = 6371;
+	const toRad = (deg: number): number => (deg * Math.PI) / 180;
+	const dLat = toRad(lat2 - lat1);
+	const dLon = toRad(lon2 - lon1);
+	const a =
+		Math.sin(dLat / 2) ** 2 +
+		Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+	return 2 * R * Math.asin(Math.sqrt(a));
+}

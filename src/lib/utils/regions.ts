@@ -15,6 +15,8 @@ export {
 	searchRegions,
 	findRegencyByCode,
 	regenciesOfProvince,
+	nearestRegion,
+	haversineKm,
 	REGENCIES
 } from '$lib/data/regencies';
 

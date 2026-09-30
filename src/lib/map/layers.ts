@@ -103,12 +103,17 @@ function toProperties(event: DisasterEvent): EventFeatureProperties {
 
 	// Prefer the specific entity name (volcano) over the generic type label so
 	// the map does not label every volcano with the same "Gunung Api" text.
-	// Wildfire points are individual satellite hotspots, so label them "Hotspot".
+	// Wildfire points are individual satellite hotspots; label them with their
+	// nearest administrative area when known, else a generic "Hotspot".
 	const specificName =
 		event.type === 'volcano' ? String(event.metadata?.volcanoName ?? '').trim() : '';
+	const wildfireArea =
+		event.type === 'wildfire'
+			? String(event.metadata?.areaName ?? event.location.regency ?? '').trim()
+			: '';
 	const label =
 		event.type === 'wildfire'
-			? 'Hotspot'
+			? wildfireArea || 'Hotspot'
 			: specificName
 				? `Gunung ${specificName}`
 				: typeToken.label;
@@ -205,6 +210,7 @@ export const MAP_IDS = {
 	pointSource: 'events-points',
 	clusterSource: 'events-clusters',
 	areaSource: 'events-areas',
+	pointAreas: 'events-point-area-layer',
 	clusters: 'events-cluster-layer',
 	clusterCount: 'events-cluster-count',
 	points: 'events-point-layer',

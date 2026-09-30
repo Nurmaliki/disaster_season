@@ -63,6 +63,19 @@
 		low: hotspots.filter((e) => confidenceOf(e) === 'low').length
 	});
 
+	/**
+	 * Hotspots grouped by their nearest province, most-affected first. The region
+	 * is a best-effort label (nearest bundled reference), not a boundary claim.
+	 */
+	const byProvince = $derived.by(() => {
+		const tally: Record<string, number> = {};
+		for (const event of hotspots) {
+			const name = event.location.province ?? 'Tidak diketahui';
+			tally[name] = (tally[name] ?? 0) + 1;
+		}
+		return Object.entries(tally).sort((a, b) => b[1] - a[1]);
+	});
+
 	async function refresh(): Promise<void> {
 		refreshing = true;
 		try {
@@ -131,6 +144,26 @@
 				</div>
 			{/each}
 		</div>
+
+		<!-- Per-area summary: hotspots grouped by nearest province -->
+		{#if byProvince.length > 0}
+			<div class="card p-3">
+				<p class="eyebrow mb-2">Sebaran per wilayah (provinsi terdekat)</p>
+				<ul class="flex flex-wrap gap-1.5">
+					{#each byProvince as [name, count] (name)}
+						<li
+							class="surface-subtle inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-2.5 py-1 text-[11px]"
+						>
+							<span class="font-medium">{name}</span>
+							<span class="text-subtle tabular-nums">{count}</span>
+						</li>
+					{/each}
+				</ul>
+				<p class="text-subtle mt-2 text-[10px]">
+					Wilayah adalah titik acuan terdekat, bukan klaim batas administratif.
+				</p>
+			</div>
+		{/if}
 
 		{#if mapped.length > 0}
 			<div class="overflow-hidden rounded-xl border border-[var(--border)]">

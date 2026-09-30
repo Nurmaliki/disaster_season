@@ -303,6 +303,22 @@
 		});
 
 		// --- Individual points ---
+		// A soft area halo under each point gives it an areal footprint on the
+		// map (a hotspot is a detection with spatial extent, not a pin). Drawn
+		// below the point so the exact centre stays readable.
+		map.addLayer({
+			id: MAP_IDS.pointAreas,
+			type: 'circle',
+			source: MAP_IDS.clusterSource,
+			filter: ['!', ['has', 'point_count']] as never,
+			paint: {
+				'circle-color': severityColorExpression() as never,
+				'circle-radius': 14,
+				'circle-opacity': 0.14,
+				'circle-blur': 1
+			}
+		});
+
 		// Hazard/risk zones render as hollow rings so they are visually distinct
 		// from actual events.
 		map.addLayer({
@@ -493,6 +509,7 @@
 		const filter = categoryFilter() as never;
 		map.setFilter(MAP_IDS.areaFill, filter);
 		map.setFilter(MAP_IDS.areaOutline, filter);
+		map.setFilter(MAP_IDS.pointAreas, ['all', ['!', ['has', 'point_count']], filter] as never);
 		map.setFilter(MAP_IDS.points, ['all', ['!', ['has', 'point_count']], filter] as never);
 		map.setFilter(MAP_IDS.pointLabels, ['all', ['!', ['has', 'point_count']], filter] as never);
 	}
