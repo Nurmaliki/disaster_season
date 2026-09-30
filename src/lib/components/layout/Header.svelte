@@ -27,6 +27,7 @@
 		{ path: '/warnings', label: 'Peringatan Dini', icon: TriangleAlert },
 		{ path: '/earthquakes', label: 'Gempa', icon: Activity },
 		{ path: '/volcanoes', label: 'Gunung Api', icon: Flame },
+		{ path: '/wildfire', label: 'Karhutla', icon: Flame },
 		{ path: '/weather', label: 'Cuaca', icon: CloudSun },
 		{ path: '/seasons', label: 'Musim', icon: CalendarRange },
 		{ path: '/statistics', label: 'Statistik', icon: ChartPie },

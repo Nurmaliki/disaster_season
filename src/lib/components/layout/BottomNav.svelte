@@ -14,7 +14,8 @@
 		{ path: '/map', label: 'Peta', icon: MapIcon },
 		{ path: '/warnings', label: 'Peringatan', icon: TriangleAlert },
 		{ path: '/earthquakes', label: 'Gempa', icon: Activity },
-		{ path: '/volcanoes', label: 'Gunung', icon: Flame }
+		{ path: '/volcanoes', label: 'Gunung', icon: Flame },
+		{ path: '/wildfire', label: 'Karhutla', icon: Flame }
 	] as const;
 
 	const current = $derived(page.url.pathname);
@@ -28,7 +29,7 @@
 	class="surface-elevated/95 fixed right-0 bottom-0 left-0 z-40 border-t border-[var(--border)] pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
 	aria-label="Navigasi bawah"
 >
-	<ul class="grid grid-cols-5">
+	<ul class="grid grid-cols-6">
 		{#each ITEMS as item (item.path)}
 			<li>
 				<a
