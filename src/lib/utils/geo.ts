@@ -142,3 +142,30 @@ export function isWithinIndonesia(latitude: number, longitude: number): boolean 
 		longitude <= INDONESIA_BBOX.maxLon
 	);
 }
+
+/** The eight principal compass directions, Indonesian, clockwise from north. */
+export const COMPASS_POINTS_ID = [
+	'Utara',
+	'Timur Laut',
+	'Timur',
+	'Tenggara',
+	'Selatan',
+	'Barat Daya',
+	'Barat',
+	'Barat Laut'
+] as const;
+
+export type CompassPointId = (typeof COMPASS_POINTS_ID)[number];
+
+/**
+ * Maps a bearing (degrees clockwise from north) to the nearest of the eight
+ * principal compass directions. Used for wind labels and the compass rose.
+ */
+export function bearingToCompass(degrees: number): CompassPointId {
+	const normalized = ((degrees % 360) + 360) % 360;
+	const index = Math.round(normalized / 45) % 8;
+	return COMPASS_POINTS_ID[index];
+}
+
+/** Short Indonesian compass initials (U/TL/T/…), clockwise from north. */
+export const COMPASS_ABBR_ID = ['U', 'TL', 'T', 'TG', 'S', 'BD', 'B', 'BL'] as const;

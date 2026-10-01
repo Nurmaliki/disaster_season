@@ -107,6 +107,24 @@ export interface RegionsPayload {
 	regencies: Region[];
 }
 
+/** One wind probe point: a flow vector plus the compass it blows from. */
+export interface WindSample {
+	latitude: number;
+	longitude: number;
+	/** Eastward flow component, km/h (positive = air moving east). */
+	u: number;
+	/** Northward flow component, km/h (positive = air moving north). */
+	v: number;
+	speedKmh: number;
+	fromDirection: string | null;
+}
+
+export interface WindPayload {
+	samples: WindSample[];
+	updatedAt: string;
+	partial: boolean;
+}
+
 export type SearchResultKind = 'region' | 'earthquake' | 'warning' | 'volcano';
 
 export interface SearchResult {

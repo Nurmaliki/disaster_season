@@ -6,7 +6,8 @@ import {
 	pointInGeometry,
 	geometryBounds,
 	geometryCenter,
-	isWithinIndonesia
+	isWithinIndonesia,
+	bearingToCompass
 } from '$lib/utils/geo';
 
 describe('haversine distance', () => {
@@ -167,5 +168,26 @@ describe('Indonesia bounding box validation', () => {
 		expect(isWithinIndonesia(0, 0)).toBe(false);
 		expect(isWithinIndonesia(51.5, -0.1)).toBe(false); // London
 		expect(isWithinIndonesia(Number.NaN, 106)).toBe(false);
+	});
+});
+
+describe('bearing to compass direction', () => {
+	it('maps the four cardinal bearings', () => {
+		expect(bearingToCompass(0)).toBe('Utara');
+		expect(bearingToCompass(90)).toBe('Timur');
+		expect(bearingToCompass(180)).toBe('Selatan');
+		expect(bearingToCompass(270)).toBe('Barat');
+	});
+
+	it('rounds to the nearest of eight points', () => {
+		expect(bearingToCompass(44)).toBe('Timur Laut');
+		expect(bearingToCompass(46)).toBe('Timur Laut');
+		expect(bearingToCompass(316)).toBe('Barat Laut');
+	});
+
+	it('normalises out-of-range and negative bearings', () => {
+		expect(bearingToCompass(360)).toBe('Utara');
+		expect(bearingToCompass(-90)).toBe('Barat');
+		expect(bearingToCompass(450)).toBe('Timur');
 	});
 });

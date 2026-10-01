@@ -16,6 +16,8 @@
 	import { resolve } from '$app/paths';
 	import type { Map as MaplibreMap, GeoJSONSource } from 'maplibre-gl';
 	import type { DisasterEvent } from '$lib/types';
+	import type { WindPayload, WindSample } from '$lib/api/types';
+	import WindParticleLayer from '$lib/components/map/WindParticleLayer.svelte';
 	import {
 		eventsToFeatureCollection,
 		MAP_IDS,
@@ -29,7 +31,8 @@
 	import { SEVERITY_TOKENS } from '$lib/utils/severity';
 	import { formatDateTime } from '$lib/utils/format';
 	import { theme } from '$lib/stores/theme';
-	import { LocateFixed, Layers, X } from 'lucide-svelte';
+	import { apiGet, errorMessage } from '$lib/api/client';
+	import { LocateFixed, Layers, X, Compass } from 'lucide-svelte';
 
 	/**
 	 * The map.
@@ -41,6 +44,9 @@
 	 *    so provider-supplied strings can never inject markup.
 	 *  - Geolocation only runs after an explicit user click and the resulting
 	 *    coordinate is never sent to a provider (see /api/nearby).
+	 *  - A compass rose (U/T/S/B) tracks map rotation, and an optional wind
+	 *    particle overlay animates flow direction from /api/wind. The overlay is
+	 *    lazy: no wind request is made until the user switches the layer on.
 	 */
 	interface Props {
 		events: DisasterEvent[];
@@ -72,9 +78,11 @@
 	}: Props = $props();
 
 	let container: HTMLDivElement | undefined = $state();
-	let map: MaplibreMap | null = null;
+	let map: MaplibreMap | null = $state(null);
 	let mapReady = $state(false);
 	let mapError = $state<string | null>(null);
+	/** Current map rotation in degrees (0 = north up), for the compass rose. */
+	let mapBearing = $state(0);
 	/** Fires if the basemap has not loaded within the grace period. */
 	let loadWatchdog: number | null = null;
 	/** Keeps the map canvas sized to its container across layout changes. */
@@ -82,6 +90,15 @@
 	let locating = $state(false);
 	let locationNotice = $state<string | null>(null);
 	let showLayers = $state(false);
+
+	// Wind overlay: off by default so the map loads without an extra network
+	// round-trip; toggled on from the layer panel when the user wants it.
+	let showWind = $state(false);
+	let windSamples = $state<WindSample[]>([]);
+	let windLoading = $state(false);
+	let windError = $state<string | null>(null);
+	/** Bumped on each toggle-on so a fresh field is fetched at most once per session-ish. */
+	let windFetchedAt = 0;
 
 	// Layer visibility toggles.
 	let layerVisibility = $state({
@@ -168,7 +185,9 @@
 				keyboard: true
 			});
 
-			map.addControl(new maplibre.NavigationControl({ showCompass: false }), 'top-right');
+			// The compass button is shown so users can see and reset north; the
+			// rose overlay below mirrors the heading numerically.
+			map.addControl(new maplibre.NavigationControl({ showCompass: true }), 'top-right');
 			map.addControl(
 				new maplibre.AttributionControl({
 					compact: true,
@@ -208,6 +227,11 @@
 			if (syncUrl) {
 				map.on('moveend', persistView);
 			}
+
+			// Track rotation so the compass rose overlay can spin with the map.
+			map.on('rotate', () => {
+				if (map) mapBearing = map.getBearing();
+			});
 
 			// Keep the map sized to its container.
 			//
@@ -570,6 +594,37 @@
 		map?.flyTo({ center: initialCenter, zoom: initialZoom });
 	}
 
+	/**
+	 * Loads the wind field used by the particle overlay.
+	 *
+	 * Kept lazy (only on first toggle) because it costs a handful of upstream
+	 * weather probes. The result is cached client-side for 15 minutes, matching
+	 * the server's own cache window, so re-toggling does not refetch.
+	 */
+	async function loadWind(): Promise<void> {
+		const FRESH_MS = 15 * 60_000;
+		if (windSamples.length && Date.now() - windFetchedAt < FRESH_MS) return;
+
+		windLoading = true;
+		windError = null;
+		try {
+			const response = await apiGet<WindPayload>('/api/wind');
+			windSamples = response.data.samples;
+			windFetchedAt = Date.now();
+			if (!windSamples.length) windError = 'Data angin tidak tersedia saat ini.';
+		} catch (error) {
+			windError = errorMessage(error);
+			windSamples = [];
+		} finally {
+			windLoading = false;
+		}
+	}
+
+	function toggleWind(): void {
+		showWind = !showWind;
+		if (showWind) void loadWind();
+	}
+
 	// React to data changes.
 	$effect(() => {
 		void events;
@@ -613,6 +668,9 @@
 	});
 
 	const visibleCount = $derived(events.length);
+
+	/** Wind particles read brighter on the dark basemap. */
+	const windColor = $derived($theme === 'dark' ? 'rgba(125,211,252,0.9)' : 'rgba(2,132,199,0.85)');
 </script>
 
 <div
@@ -625,6 +683,10 @@
 		aria-label="Peta interaktif bencana Indonesia"
 		role="application"
 	></div>
+
+	{#if showWind}
+		<WindParticleLayer {map} samples={windSamples} color={windColor} />
+	{/if}
 
 	{#if mapError}
 		<div class="surface-elevated absolute inset-0 flex items-center justify-center p-4">
@@ -697,6 +759,32 @@
 							</li>
 						{/each}
 					</ul>
+
+					<div class="mt-3 border-t border-[var(--border)] pt-3">
+						<label class="flex cursor-pointer items-center gap-2 text-xs">
+							<input
+								type="checkbox"
+								checked={showWind}
+								onchange={toggleWind}
+								class="h-3.5 w-3.5 accent-sky-600"
+							/>
+							<span class="flex items-center gap-1">
+								<Compass size={12} />
+								Aliran angin
+							</span>
+						</label>
+						{#if showWind}
+							<p class="text-subtle mt-1.5 pl-6 text-[10px] leading-snug">
+								{#if windLoading}
+									Memuat data angin…
+								{:else if windError}
+									{windError}
+								{:else}
+									Perkiraan arah angin dari prakiraan BMKG pada titik provinsi.
+								{/if}
+							</p>
+						{/if}
+					</div>
 				</div>
 			{/if}
 		</div>
@@ -715,6 +803,30 @@
 					</li>
 				{/each}
 			</ul>
+		</div>
+
+		<!-- Compass rose: shows which way north points as the map is rotated -->
+		<div
+			class="surface-elevated/95 pointer-events-none absolute right-2 bottom-9 hidden h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] shadow-sm sm:flex"
+			aria-hidden="true"
+		>
+			<div class="relative h-full w-full" style="transform: rotate({-mapBearing}deg)">
+				<span class="absolute top-0.5 left-1/2 -translate-x-1/2 text-[9px] font-bold text-red-500"
+					>U</span
+				>
+				<span class="absolute top-1/2 right-1 -translate-y-1/2 text-[9px] font-semibold">T</span>
+				<span class="absolute bottom-0.5 left-1/2 -translate-x-1/2 text-[9px] font-semibold">S</span
+				>
+				<span class="absolute top-1/2 left-1 -translate-y-1/2 text-[9px] font-semibold">B</span>
+				<!-- Needle -->
+				<svg
+					class="absolute inset-0 m-auto h-4 w-4 text-red-500"
+					viewBox="0 0 24 24"
+					fill="currentColor"
+				>
+					<path d="M12 2 8 20l4-3 4 3z" />
+				</svg>
+			</div>
 		</div>
 
 		<!-- Live count -->
