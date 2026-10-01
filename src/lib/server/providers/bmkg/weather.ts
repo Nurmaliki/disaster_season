@@ -58,10 +58,12 @@ export interface BmkgWeatherResponse {
 export type AdmLevel = 1 | 2 | 3 | 4;
 
 export function isValidAdmCode(level: AdmLevel, code: string): boolean {
-	const pattern = /^\d{2}(\.\d{2}){0,3}$/;
-	if (!pattern.test(code)) return false;
-	const segments = code.split('.').length;
-	return segments === level;
+	// The Kode Wilayah scheme uses 2-digit segments for province, regency and
+	// district, but the village (adm4) segment is 4 digits — e.g. "31.71.01.1001".
+	// A uniform `\d{2}`-per-segment pattern would wrongly reject every adm4 code.
+	const segments = code.split('.');
+	if (segments.length !== level) return false;
+	return segments.every((segment, i) => new RegExp(`^\\d{${i === 3 ? 4 : 2}}$`).test(segment));
 }
 
 export async function fetchWeather(

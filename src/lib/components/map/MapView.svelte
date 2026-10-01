@@ -608,7 +608,9 @@
 		windLoading = true;
 		windError = null;
 		try {
-			const response = await apiGet<WindPayload>('/api/wind');
+			// The field is assembled from a lattice of upstream probes, so a cold
+			// server cache can legitimately take longer than the 15 s default.
+			const response = await apiGet<WindPayload>('/api/wind', {}, { timeoutMs: 45000 });
 			windSamples = response.data.samples;
 			windFetchedAt = Date.now();
 			if (!windSamples.length) windError = 'Data angin tidak tersedia saat ini.';
@@ -689,14 +691,14 @@
 	{/if}
 
 	{#if mapError}
-		<div class="surface-elevated absolute inset-0 flex items-center justify-center p-4">
+		<div class="surface-elevated absolute inset-0 z-[2] flex items-center justify-center p-4">
 			<p class="text-subtle max-w-sm text-center text-sm">{mapError}</p>
 		</div>
 	{/if}
 
 	{#if showControls}
 		<!-- Top-left: locate + reset -->
-		<div class="absolute top-2 left-2 flex flex-col gap-1.5">
+		<div class="absolute top-2 left-2 z-[2] flex flex-col gap-1.5">
 			<button
 				type="button"
 				onclick={locate}
@@ -718,7 +720,7 @@
 		</div>
 
 		<!-- Layer toggle -->
-		<div class="absolute top-2 right-2">
+		<div class="absolute top-2 right-2 z-[2]">
 			<button
 				type="button"
 				onclick={() => (showLayers = !showLayers)}
@@ -791,7 +793,7 @@
 
 		<!-- Legend -->
 		<div
-			class="surface-elevated/95 pointer-events-none absolute bottom-6 left-2 hidden rounded-lg border border-[var(--border)] px-2.5 py-2 text-[10px] shadow-sm sm:block"
+			class="surface-elevated/95 pointer-events-none absolute bottom-6 left-2 z-[2] hidden rounded-lg border border-[var(--border)] px-2.5 py-2 text-[10px] shadow-sm sm:block"
 		>
 			<p class="eyebrow mb-1">Tingkat keparahan</p>
 			<ul class="space-y-0.5">
@@ -807,7 +809,7 @@
 
 		<!-- Compass rose: shows which way north points as the map is rotated -->
 		<div
-			class="surface-elevated/95 pointer-events-none absolute right-2 bottom-9 hidden h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] shadow-sm sm:flex"
+			class="surface-elevated/95 pointer-events-none absolute right-2 bottom-9 z-[2] hidden h-11 w-11 items-center justify-center rounded-full border border-[var(--border)] shadow-sm sm:flex"
 			aria-hidden="true"
 		>
 			<div class="relative h-full w-full" style="transform: rotate({-mapBearing}deg)">
@@ -831,7 +833,7 @@
 
 		<!-- Live count -->
 		<div
-			class="surface-elevated/95 absolute right-2 bottom-2 rounded-md border border-[var(--border)] px-2 py-1 text-[10px] font-medium shadow-sm"
+			class="surface-elevated/95 absolute right-2 bottom-2 z-[2] rounded-md border border-[var(--border)] px-2 py-1 text-[10px] font-medium shadow-sm"
 		>
 			{visibleCount} peristiwa dipetakan
 		</div>
@@ -839,7 +841,7 @@
 
 	{#if locationNotice}
 		<div
-			class="absolute right-2 bottom-14 left-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-950 dark:text-amber-100"
+			class="absolute right-2 bottom-14 left-2 z-[2] rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-500/40 dark:bg-amber-950 dark:text-amber-100"
 			role="status"
 		>
 			{locationNotice}
