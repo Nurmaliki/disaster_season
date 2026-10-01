@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import type { DashboardPayload } from '$lib/api/types';
 	import MapView from '$lib/components/map/MapView.svelte';
+	import NearbyConditions from '$lib/components/map/NearbyConditions.svelte';
 	import EventCard from '$lib/components/EventCard.svelte';
 	import DataStatusBar from '$lib/components/ui/DataStatusBar.svelte';
 	import ErrorPanel from '$lib/components/ui/ErrorPanel.svelte';
@@ -91,9 +92,11 @@
 			</div>
 
 			<aside
-				class="w-full shrink-0 border-t border-[var(--border)] p-3 lg:w-96 lg:border-t-0 lg:border-l"
+				class="scroll-thin w-full shrink-0 space-y-3 overflow-y-auto border-t border-[var(--border)] p-3 lg:w-96 lg:border-t-0 lg:border-l"
 				aria-label="Daftar peristiwa"
 			>
+				<NearbyConditions radiusKm={150} />
+
 				<div class="mb-2 flex items-center justify-between">
 					<h2 class="text-sm font-semibold">{filtered.length} peristiwa</h2>
 					{#if selectedEvent}
@@ -107,9 +110,7 @@
 					{/if}
 				</div>
 
-				<div
-					class="scroll-thin max-h-[70vh] space-y-2 overflow-y-auto lg:max-h-[calc(100vh-13rem)]"
-				>
+				<div class="space-y-2">
 					{#each filtered as event (event.id)}
 						<EventCard {event} compact />
 					{:else}

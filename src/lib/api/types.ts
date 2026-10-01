@@ -125,6 +125,55 @@ export interface WindPayload {
 	partial: boolean;
 }
 
+/** One forecast slot, as returned by GET /api/weather. */
+export interface WeatherSlot {
+	datetime: string;
+	localDatetime: string;
+	timezone: string;
+	temperatureC: number | null;
+	humidity: number | null;
+	condition: string;
+	conditionEn: string;
+	cloudCoverPct: number | null;
+	precipitationMm: number | null;
+	windSpeedKmh: number | null;
+	windDirection: string | null;
+	windDirectionDeg: number | null;
+	iconUrl: string | null;
+}
+
+/** Payload of GET /api/weather — BMKG forecast for one adm4 village. */
+export interface WeatherPayload {
+	location: {
+		adm1: string;
+		adm2: string;
+		adm3: string;
+		adm4: string;
+		province: string;
+		regency: string;
+		district: string;
+		village: string;
+		latitude: number;
+		longitude: number;
+		timezone: string;
+	};
+	slots: WeatherSlot[];
+	current: WeatherSlot | null;
+	daily: Array<{
+		date: string;
+		label: string;
+		minTempC: number | null;
+		maxTempC: number | null;
+		dominantCondition: string;
+		maxPrecipitationMm: number | null;
+		iconUrl: string | null;
+	}>;
+	severity: Severity;
+	severityReason: string;
+	source: { name: string; url: string };
+	updatedAt: string;
+}
+
 export type SearchResultKind = 'region' | 'earthquake' | 'warning' | 'volcano';
 
 export interface SearchResult {
