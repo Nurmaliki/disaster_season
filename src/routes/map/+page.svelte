@@ -81,7 +81,7 @@
 		<!-- Map + side list -->
 		<div class="mx-auto flex min-h-0 w-full max-w-[1600px] flex-1 flex-col lg:flex-row">
 			<div class="flex p-2 lg:min-h-0 lg:flex-1 lg:flex-col">
-				<div class="h-[70vh] w-full lg:h-full">
+				<div class="h-[70vh] w-full lg:h-[calc(100vh-8.5rem)]">
 					<MapView
 						events={filtered}
 						height="100%"
@@ -92,7 +92,7 @@
 			</div>
 
 			<aside
-				class="scroll-thin w-full shrink-0 space-y-3 overflow-y-auto border-t border-[var(--border)] p-3 lg:w-96 lg:border-t-0 lg:border-l"
+				class="scroll-thin w-full shrink-0 space-y-3 overflow-y-auto border-t border-[var(--border)] p-3 lg:h-[calc(100vh-8.5rem)] lg:w-96 lg:border-t-0 lg:border-l"
 				aria-label="Daftar peristiwa"
 			>
 				<NearbyConditions radiusKm={150} />
