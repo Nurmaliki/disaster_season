@@ -95,21 +95,55 @@
 	let prevY: Float32Array = new Float32Array(0);
 	let hasPrev: boolean[] = [];
 
-	/** Base particle count, tuned by viewport area but capped for mobile. */
+	/** Base particle count, tuned by viewport area but capped for large screens. */
 	function particleBudget(): number {
 		if (density > 0) return density;
 		const area = width * height;
-		return Math.round(Math.min(2600, Math.max(500, area / 1400)));
+		// Denser than before: with viewport-relative seeding every particle is
+		// actually on screen, so a higher count reads as continuous flow rather
+		// than a sparse scatter (the old bug was that most particles sat off-screen).
+		return Math.round(Math.min(5000, Math.max(1200, area / 450)));
 	}
 
-	// Indonesia's bounding box, padded a little. Seeding particles inside it
-	// (rather than the whole globe) concentrates the animation where we actually
-	// have wind data and avoids a wasted field of dead particles elsewhere.
+	// Indonesia's bounding box, padded a little. Used as a fallback when the map
+	// is not ready to report its viewport, and to keep respawns on Indonesian
+	// soil when zoomed all the way out.
 	const SEED_BOUNDS = { minLon: 92, maxLon: 144, minLat: -13, maxLat: 9 };
 
+	/**
+	 * Current visible geographic bounds, padded by `pad` so particles can flow in
+	 * from just off-screen before entering. Returns null if the map cannot be
+	 * projected yet.
+	 *
+	 * Seeding inside the viewport (rather than the whole archipelago) is what
+	 * keeps particle density constant at every zoom level: previously a zoomed-in
+	 * view showed only the ~0.4% of particles that happened to fall inside it.
+	 */
+	function viewportBounds(pad = 0.25): {
+		minLon: number;
+		maxLon: number;
+		minLat: number;
+		maxLat: number;
+	} | null {
+		if (!map || width <= 0 || height <= 0) return null;
+		try {
+			const sw = map.unproject([-pad * width, height + pad * height]);
+			const ne = map.unproject([width + pad * width, -pad * height]);
+			const minLon = Math.max(-180, Math.min(sw.lng, ne.lng));
+			const maxLon = Math.min(180, Math.max(sw.lng, ne.lng));
+			const minLat = Math.max(-85, Math.min(sw.lat, ne.lat));
+			const maxLat = Math.min(85, Math.max(sw.lat, ne.lat));
+			if (!(maxLon > minLon) || !(maxLat > minLat)) return null;
+			return { minLon, maxLon, minLat, maxLat };
+		} catch {
+			return null;
+		}
+	}
+
 	function respawn(i: number): void {
-		particleLon[i] = SEED_BOUNDS.minLon + Math.random() * (SEED_BOUNDS.maxLon - SEED_BOUNDS.minLon);
-		particleLat[i] = SEED_BOUNDS.minLat + Math.random() * (SEED_BOUNDS.maxLat - SEED_BOUNDS.minLat);
+		const b = viewportBounds() ?? SEED_BOUNDS;
+		particleLon[i] = b.minLon + Math.random() * (b.maxLon - b.minLon);
+		particleLat[i] = b.minLat + Math.random() * (b.maxLat - b.minLat);
 		particleAge[i] = Math.random() * 80;
 		hasPrev[i] = false;
 	}
@@ -143,6 +177,10 @@
 	/** One animation step. Returns the number of particles step-drawn. */
 	function step(ctx: CanvasRenderingContext2D): void {
 		if (!map || !samples.length) return;
+
+		// Refresh the (padded) viewport bounds once per frame; panning/zooming
+		// then narrows the recycle test below automatically.
+		const bounds = viewportBounds(0.15);
 
 		// Fade the previous frame slightly so moving heads leave short trails
 		// instead of a solid smear.
@@ -188,6 +226,15 @@
 				continue;
 			}
 
+			// Also recycle when the particle drifts outside the (padded) viewport,
+			// so panning/zooming keeps the whole budget on screen instead of
+			// silently animating particles the user cannot see.
+			const b = bounds;
+			if (b && (lon < b.minLon || lon > b.maxLon || lat < b.minLat || lat > b.maxLat)) {
+				respawn(i);
+				continue;
+			}
+
 			particleLon[i] = lon;
 			particleLat[i] = lat;
 
@@ -225,12 +272,21 @@
 		resizeObserver = new ResizeObserver(() => resize());
 		resizeObserver.observe(map.getContainer());
 
+		// Re-seed on significant view changes so the particle field immediately
+		// fills the new viewport (rather than waiting for particles to recycle
+		// one by one). Cheap: it just re-randomises coordinates.
+		const onMoveEnd = (): void => {
+			if (width > 0 && height > 0) seed();
+		};
+		map.on('moveend', onMoveEnd);
+
 		rafId = requestAnimationFrame(loop);
 
 		return () => {
 			if (rafId !== null) cancelAnimationFrame(rafId);
 			resizeObserver?.disconnect();
 			resizeObserver = null;
+			map?.off('moveend', onMoveEnd);
 		};
 	});
 
