@@ -123,6 +123,12 @@ export function formatTemperature(celsius: number | null | undefined): string {
 	return `${Math.round(celsius)}°C`;
 }
 
+/** Formats relative humidity as "85%". Returns "—" when the value is absent. */
+export function formatHumidity(percent: number | null | undefined): string {
+	if (percent === null || percent === undefined || !Number.isFinite(percent)) return '—';
+	return `${formatNumber(percent, { maximumFractionDigits: 0 })}%`;
+}
+
 export function formatDepth(km: number | null | undefined): string {
 	if (km === null || km === undefined || !Number.isFinite(km)) return '—';
 	return `${formatNumber(km, { maximumFractionDigits: 0 })} km`;

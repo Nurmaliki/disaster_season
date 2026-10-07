@@ -12,8 +12,10 @@
 	import RiskBadge from '$lib/components/ui/RiskBadge.svelte';
 	import DataStatusBar from '$lib/components/ui/DataStatusBar.svelte';
 	import TypeIcon from '$lib/components/ui/TypeIcon.svelte';
+	import HumidityBadge from '$lib/components/ui/HumidityBadge.svelte';
 	import MapView from '$lib/components/map/MapView.svelte';
-	import { formatRelative } from '$lib/utils/format';
+	import { formatRelative, formatHumidity } from '$lib/utils/format';
+	import { HUMIDITY_BANDS } from '$lib/utils/humidity';
 	import {
 		Activity,
 		TriangleAlert,
@@ -21,7 +23,8 @@
 		RefreshCw,
 		ArrowRight,
 		Waves,
-		CloudLightning
+		CloudLightning,
+		Droplets
 	} from 'lucide-svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -187,7 +190,88 @@
 						: 'neutral'}
 				hint="Bukan peringatan resmi"
 			/>
+			{#if dashboard.humidity?.nationalAverage != null}
+				<StatCard
+					label="Kelembapan Nasional"
+					value={Math.round(dashboard.humidity.nationalAverage)}
+					unit="%"
+					tone="neutral"
+					hint="Rata-rata ibu kota provinsi · BMKG"
+				>
+					{#snippet icon()}<Droplets size={16} />{/snippet}
+				</StatCard>
+			{/if}
 		</div>
+
+		<!-- National humidity snapshot -->
+		{#if dashboard.humidity}
+			<section aria-labelledby="humidity-heading" class="card p-4">
+				<div class="flex flex-wrap items-center justify-between gap-2">
+					<h2 id="humidity-heading" class="flex items-center gap-1.5 text-sm font-semibold">
+						<Droplets size={15} class="text-sky-500" aria-hidden="true" />
+						Kelembapan Udara per Provinsi
+					</h2>
+					{#if dashboard.humidity.nationalAverage != null}
+						<HumidityBadge humidity={dashboard.humidity.nationalAverage} size="md" />
+					{/if}
+				</div>
+
+				{#if dashboard.humidity.provinces.length > 0}
+					<p class="text-subtle mt-1.5 text-[11px]">
+						Prakiraan BMKG per ibu kota provinsi ({dashboard.humidity.sampledCount}/{dashboard
+							.humidity.totalCount}
+						terjangkau){#if dashboard.humidity.nationalAverage != null}, rata-rata nasional <span
+								class="font-medium tabular-nums"
+								>{formatHumidity(dashboard.humidity.nationalAverage)}</span
+							>{/if}{#if dashboard.humidity.min != null && dashboard.humidity.max != null}, rentang <span
+								class="tabular-nums"
+								>{formatHumidity(dashboard.humidity.min)}–{formatHumidity(
+									dashboard.humidity.max
+								)}</span
+							>{/if}. Klasifikasi internal, bukan produk resmi BMKG.
+					</p>
+
+					<!-- Band distribution -->
+					<div class="mt-3 flex flex-wrap gap-2">
+						{#each HUMIDITY_BANDS as band (band.level)}
+							{#if (dashboard.humidity.bandCounts[band.level] ?? 0) > 0}
+								<span
+									class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold {band.badgeClass}"
+								>
+									{band.label}
+									<span class="tabular-nums opacity-80"
+										>{dashboard.humidity.bandCounts[band.level]}</span
+									>
+								</span>
+							{/if}
+						{/each}
+					</div>
+
+					<!-- Per-province list, driest first -->
+					<div class="mt-3 grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+						{#each [...dashboard.humidity.provinces].sort((a, b) => a.humidity - b.humidity) as province (province.code)}
+							<a
+								href={resolve('/location/[regionCode]', { regionCode: province.code })}
+								class="surface-subtle flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-xs transition hover:border-[var(--border-strong)]"
+							>
+								<span class="min-w-0 truncate font-medium">{province.name}</span>
+								<HumidityBadge humidity={province.humidity} showLabel={false} size="sm" />
+							</a>
+						{/each}
+					</div>
+
+					{#if dashboard.humidity.partial}
+						<p class="text-subtle mt-2 text-[10px]">
+							Sebagian wilayah tidak mengembalikan data kelembapan dan tidak dihitung.
+						</p>
+					{/if}
+				{:else}
+					<InlineNotice tone="neutral">
+						Data kelembapan wilayah tidak dapat dimuat saat ini.
+					</InlineNotice>
+				{/if}
+			</section>
+		{/if}
 
 		<!-- Map + risk -->
 		<div class="grid gap-4 lg:grid-cols-[2fr_1fr]">

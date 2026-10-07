@@ -6,8 +6,11 @@
 	import ErrorPanel from '$lib/components/ui/ErrorPanel.svelte';
 	import RiskBadge from '$lib/components/ui/RiskBadge.svelte';
 	import DataStatusBar from '$lib/components/ui/DataStatusBar.svelte';
+	import HumidityBadge from '$lib/components/ui/HumidityBadge.svelte';
+	import HumidityTrend from '$lib/components/ui/HumidityTrend.svelte';
 	import MapView from '$lib/components/map/MapView.svelte';
-	import { formatTemperature, formatWind, timezoneLabel } from '$lib/utils/format';
+	import { formatTemperature, formatWind, formatHumidity, timezoneLabel } from '$lib/utils/format';
+	import { classifyHumidity } from '$lib/utils/humidity';
 	import { CloudSun, MapPin, Droplets, Wind, Thermometer } from 'lucide-svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -72,10 +75,10 @@
 						<p class="text-3xl font-bold">{formatTemperature(weather.current.temperatureC)}</p>
 						<p class="text-muted text-sm">{weather.current.condition}</p>
 					</div>
-					<div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs sm:grid-cols-3">
+					<div class="grid grid-cols-2 gap-x-4 gap-y-2 text-xs sm:grid-cols-3">
 						<span class="inline-flex items-center gap-1">
 							<Droplets size={12} class="text-subtle" aria-hidden="true" />
-							Kelembapan {weather.current.humidity ?? '—'}%
+							Kelembapan {formatHumidity(weather.current.humidity)}
 						</span>
 						<span class="inline-flex items-center gap-1">
 							<Wind size={12} class="text-subtle" aria-hidden="true" />
@@ -86,6 +89,25 @@
 							Hujan {weather.current.precipitationMm ?? 0} mm
 						</span>
 					</div>
+				</div>
+
+				{#if weather.current.humidity !== null}
+					<div class="mt-3">
+						<HumidityBadge humidity={weather.current.humidity} size="md" />
+						<span class="text-subtle ml-2 text-[11px]">
+							{classifyHumidity(weather.current.humidity)?.description ?? ''}
+						</span>
+					</div>
+				{/if}
+			{/if}
+
+			{#if weather.slots.length >= 2}
+				<div class="mt-4">
+					<h3 class="eyebrow mb-1.5 flex items-center gap-1.5">
+						<Droplets size={12} class="text-sky-500" aria-hidden="true" />
+						Tren Kelembapan per Jam
+					</h3>
+					<HumidityTrend slots={weather.slots} />
 				</div>
 			{/if}
 
@@ -99,6 +121,17 @@
 							<p class="mt-1 text-xs tabular-nums">
 								{formatTemperature(day.minTempC)} – {formatTemperature(day.maxTempC)}
 							</p>
+							{#if day.avgHumidity !== null}
+								<p class="text-subtle mt-1 flex items-center gap-1 text-[11px] tabular-nums">
+									<Droplets size={11} aria-hidden="true" />
+									RH rata-rata {formatHumidity(day.avgHumidity)}
+									{#if day.minHumidity !== null && day.maxHumidity !== null}
+										<span class="opacity-70">
+											({formatHumidity(day.minHumidity)}–{formatHumidity(day.maxHumidity)})
+										</span>
+									{/if}
+								</p>
+							{/if}
 						</div>
 					{/each}
 				</div>

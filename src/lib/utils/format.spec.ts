@@ -8,6 +8,7 @@ import {
 	formatDepth,
 	formatDistance,
 	formatWind,
+	formatHumidity,
 	timezoneLabel
 } from '$lib/utils/format';
 import { searchRegions } from '$lib/data/regencies';
@@ -95,6 +96,14 @@ describe('number formatting', () => {
 	it('formats wind with direction', () => {
 		expect(formatWind(15, 'NW')).toBe('15 km/jam NW');
 		expect(formatWind(null)).toBe('—');
+	});
+
+	it('formats humidity as a whole-percent value', () => {
+		expect(formatHumidity(85)).toBe('85%');
+		expect(formatHumidity(72.6)).toBe('73%');
+		expect(formatHumidity(0)).toBe('0%');
+		expect(formatHumidity(null)).toBe('—');
+		expect(formatHumidity(undefined)).toBe('—');
 	});
 });
 

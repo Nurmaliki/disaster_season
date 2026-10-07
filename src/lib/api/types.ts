@@ -17,10 +17,36 @@ export interface DashboardPayload {
 	countsBySeverity: Record<Severity, number>;
 	volcanoLevels: Record<string, number>;
 	risk: RiskAssessment;
+	/** National humidity snapshot (forecast-based); null when unavailable. */
+	humidity: HumidityPayload | null;
 	updatedAt: string;
 	partial: boolean;
 	warnings: string[];
 	hasData: boolean;
+}
+
+/** One province's representative humidity reading for the homepage summary. */
+export interface HumidityProvince {
+	code: string;
+	name: string;
+	latitude: number;
+	longitude: number;
+	humidity: number;
+	temperatureC: number | null;
+	capitalName: string;
+}
+
+/** Payload shape for the national relative-humidity summary. */
+export interface HumidityPayload {
+	provinces: HumidityProvince[];
+	nationalAverage: number | null;
+	min: number | null;
+	max: number | null;
+	sampledCount: number;
+	totalCount: number;
+	bandCounts: Record<string, number>;
+	updatedAt: string;
+	partial: boolean;
 }
 
 export interface VolcanoPayload {
@@ -166,6 +192,12 @@ export interface WeatherPayload {
 		maxTempC: number | null;
 		dominantCondition: string;
 		maxPrecipitationMm: number | null;
+		/** Mean relative humidity for the day (%), or null when unavailable. */
+		avgHumidity: number | null;
+		/** Minimum relative humidity for the day (%), or null when unavailable. */
+		minHumidity: number | null;
+		/** Maximum relative humidity for the day (%), or null when unavailable. */
+		maxHumidity: number | null;
 		iconUrl: string | null;
 	}>;
 	severity: Severity;

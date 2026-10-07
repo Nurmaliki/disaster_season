@@ -22,6 +22,11 @@ drought across Indonesia — built **only from official Indonesian data sources*
 - **Real volcano activity levels** — PVMBG / MAGMA, with a bundled coordinate
   reference table (volcanoes without published coordinates are never plotted).
 - **Weather forecasts** — BMKG public forecast API (village-level `adm4`).
+- **Humidity (kelembapan)** — per-slot relative humidity from BMKG, a daily
+  min/max/mean rollup, an hourly trend sparkline, and a national per-province
+  snapshot on the homepage. The comfort bands ("kering" … "sangat lembap") are
+  our own **internal** classification, always labelled as such — never an
+  official BMKG product.
 - **Seasonal context** — the national monsoon phase, clearly labelled as coarse
   context rather than a regional seasonal forecast.
 - **Statistics** — counts derived only from events actually fetched.
@@ -418,6 +423,11 @@ npx vitest run path/to/spec.ts # a single spec
   unbounded.
 - **Seasonal context is national and coarse** (calendar-month based), not a
   region-level seasonal forecast.
+- **Humidity is forecast-based and per-representative-point.** BMKG publishes
+  relative humidity only per `adm4` region, so the homepage's "Kelembapan
+  Nasional" is the mean across province-capital forecasts, not a national grid.
+  The comfort bands ("kering" … "sangat lembap") are an internal heuristic, not
+  an official BMKG classification.
 
 ## Next development
 

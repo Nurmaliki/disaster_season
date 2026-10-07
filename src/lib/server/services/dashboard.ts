@@ -4,6 +4,7 @@ import { getVolcanoes } from '$lib/server/services/aggregate';
 import { assessRisk, eventRiskScore } from '$lib/server/risk/engine';
 import { getAllProviderHealth, PROVIDER_DESCRIPTORS } from '$lib/server/services/health';
 import { eventTimestamp, eventStore } from '$lib/server/services/merge';
+import { getHumiditySummary, type HumiditySummary } from '$lib/server/services/humidity';
 import { readRecentEvents } from '$lib/server/db/repository';
 import { logger } from '$lib/server/logger';
 
@@ -32,6 +33,8 @@ export interface DashboardSummary {
 	volcanoLevels: Record<string, number>;
 	/** Internal risk indicator — never an official warning. */
 	risk: ReturnType<typeof assessRisk>;
+	/** National humidity snapshot (forecast-based); null when unavailable. */
+	humidity: HumiditySummary | null;
 	updatedAt: string;
 	partial: boolean;
 	warnings: string[];
@@ -91,6 +94,15 @@ export async function getDashboard(options: DashboardOptions = {}): Promise<Dash
 
 	const severityCounts = countSeverities(aggregate.events);
 
+	// National humidity summary is best-effort: it must never fail the homepage.
+	let humidity: HumiditySummary | null;
+	try {
+		humidity = await getHumiditySummary();
+	} catch (error) {
+		logger.warn('humidity summary unavailable for dashboard', { error });
+		humidity = null;
+	}
+
 	return {
 		activeWarnings,
 		recentEarthquakes,
@@ -100,6 +112,7 @@ export async function getDashboard(options: DashboardOptions = {}): Promise<Dash
 		countsBySeverity: severityCounts,
 		volcanoLevels,
 		risk,
+		humidity,
 		updatedAt: aggregate.updatedAt,
 		partial: aggregate.partial,
 		warnings: aggregate.warnings,

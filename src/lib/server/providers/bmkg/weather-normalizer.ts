@@ -47,6 +47,12 @@ export interface NormalizedWeather {
 		maxTempC: number | null;
 		dominantCondition: string;
 		maxPrecipitationMm: number | null;
+		/** Mean relative humidity for the day (%), or null when unavailable. */
+		avgHumidity: number | null;
+		/** Minimum relative humidity for the day (%), or null when unavailable. */
+		minHumidity: number | null;
+		/** Maximum relative humidity for the day (%), or null when unavailable. */
+		maxHumidity: number | null;
 		iconUrl: string | null;
 	}>;
 	severity: Severity;
@@ -144,6 +150,7 @@ export function normalizeWeather(
 		{
 			temps: number[];
 			precipitation: number[];
+			humidity: number[];
 			conditions: Map<string, number>;
 			icon: string | null;
 		}
@@ -152,11 +159,12 @@ export function normalizeWeather(
 		const localDate = (slot.localDatetime || slot.datetime).slice(0, 10);
 		let bucket = dayBuckets.get(localDate);
 		if (!bucket) {
-			bucket = { temps: [], precipitation: [], conditions: new Map(), icon: null };
+			bucket = { temps: [], precipitation: [], humidity: [], conditions: new Map(), icon: null };
 			dayBuckets.set(localDate, bucket);
 		}
 		if (slot.temperatureC !== null) bucket.temps.push(slot.temperatureC);
 		if (slot.precipitationMm !== null) bucket.precipitation.push(slot.precipitationMm);
+		if (slot.humidity !== null) bucket.humidity.push(slot.humidity);
 		if (slot.condition)
 			bucket.conditions.set(slot.condition, (bucket.conditions.get(slot.condition) ?? 0) + 1);
 		if (!bucket.icon && slot.iconUrl) bucket.icon = slot.iconUrl;
@@ -177,6 +185,9 @@ export function normalizeWeather(
 			const label = Number.isNaN(parsedDate.getTime())
 				? date
 				: (DAY_LABELS[parsedDate.getUTCDay()] ?? date);
+			const avgHumidity = bucket.humidity.length
+				? bucket.humidity.reduce((sum, value) => sum + value, 0) / bucket.humidity.length
+				: null;
 			return {
 				date,
 				label,
@@ -184,6 +195,9 @@ export function normalizeWeather(
 				maxTempC: bucket.temps.length ? Math.max(...bucket.temps) : null,
 				dominantCondition: dominant,
 				maxPrecipitationMm: bucket.precipitation.length ? Math.max(...bucket.precipitation) : null,
+				avgHumidity,
+				minHumidity: bucket.humidity.length ? Math.min(...bucket.humidity) : null,
+				maxHumidity: bucket.humidity.length ? Math.max(...bucket.humidity) : null,
 				iconUrl: bucket.icon
 			};
 		});

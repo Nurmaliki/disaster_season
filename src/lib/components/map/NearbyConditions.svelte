@@ -6,6 +6,8 @@
 	import { formatTemperature, formatWind, formatDistance, timezoneLabel } from '$lib/utils/format';
 	import EventCard from '$lib/components/EventCard.svelte';
 	import InlineNotice from '$lib/components/ui/InlineNotice.svelte';
+	import HumidityBadge from '$lib/components/ui/HumidityBadge.svelte';
+	import HumidityTrend from '$lib/components/ui/HumidityTrend.svelte';
 	import {
 		MapPin,
 		LocateFixed,
@@ -245,6 +247,19 @@
 						</span>
 					</div>
 				</div>
+
+				{#if weather.current.humidity !== null}
+					<div class="mt-2.5">
+						<HumidityBadge humidity={weather.current.humidity} size="sm" />
+					</div>
+				{/if}
+
+				{#if weather.slots.length >= 2}
+					<div class="mt-3">
+						<HumidityTrend slots={weather.slots} height={90} limit={6} />
+					</div>
+				{/if}
+
 				<p class="text-subtle mt-2 text-[10px]">
 					Prakiraan BMKG pada titik perwakilan wilayah terdekat
 					{weather.location.regency ? `(${weather.location.regency})` : ''} — bukan prakiraan presisi
